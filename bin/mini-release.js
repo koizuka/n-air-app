@@ -104,7 +104,7 @@ async function runScript() {
     const githubApi = `${githubApiServer}/api/v3`;
 
     const organization = 'n-air-app';
-    const repository = 'n-air-app';
+    const repository = 'n-air-app-dwango';
     const remote = 'dwango';
 
     const targetBranch = 'dwango-internal-release';
