@@ -39,8 +39,8 @@ function error(msg) {
     sh.echo(colors.red(`ERROR: ${msg}`));
 }
 
-function executeCmd(cmd) {
-    const result = sh.exec(cmd);
+function executeCmd(cmd, options) {
+    const result = sh.exec(cmd, options);
 
     if (result.code !== 0) {
         error(`Command Failed >>> ${cmd}`);
@@ -136,7 +136,7 @@ function writePatchNoteFile(patchNoteFileName, version, lines) {
 }
 
 function getTagCommitId(tag) {
-    return executeCmd(`git rev-parse -q --verify "refs/tags/${tag}" || cat /dev/null`).stdout;
+    return executeCmd(`git rev-parse -q --verify "refs/tags/${tag}" || cat /dev/null`, {silent: true}).stdout;
 }
 
 /**
@@ -194,7 +194,7 @@ async function runScript() {
     info('checking current tag...');
     const previousTag = executeCmd('git describe --tags --abbrev=0').stdout.trim();
 
-    const baseDir = executeCmd('git rev-parse --show-cdup').stdout.trim();
+    const baseDir = executeCmd('git rev-parse --show-cdup', {silent: true}).stdout.trim();
 
     let defaultVersion = generateNewVersion(previousTag);
     let notes = '';
@@ -228,7 +228,9 @@ async function runScript() {
     }
 
     if (!notes) {
-        notes = executeCmd(`git log --oneline --graph --pretty=format:"%h @%an: %s" --ancestry-path ${previousTag}..`).stdout;
+        const merges = executeCmd('git log -1 --merges --pretty=format:%P', {silent: true}).stdout.trim();
+        const mergeBase = executeCmd(`git merge-base --octopus ${merges} ${previousTag}`, {silent: true}).stdout.trim();
+        notes = executeCmd(`git log --oneline --graph --decorate ${mergeBase}.. --boundary`).stdout;
 
         writePatchNoteFile(patchNoteFileName, newVersion, notes);
         info(`generated ${patchNoteFileName}.`);
@@ -246,9 +248,6 @@ async function runScript() {
     }
     if (!await confirm(`Are you sure you want to release as version ${newVersion}?`, false)) sh.exit(0);
 
-    // update package.json with newVersion and git tag
-    executeCmd(`yarn version --new-version=${newVersion}`);
-
     if (!generateNoteTs) {
         info('skipping to generate notes.ts...');
     } else {
@@ -257,8 +256,11 @@ async function runScript() {
 
         fs.writeFileSync(noteFilename, patchNote);
         info(`generated patch-note file: ${noteFilename}.`)
-        executeCmd(`git commit --amend --no-edit ${noteFilename}`);
+        executeCmd(`git commit -m "note.ts ${newVersion}" ${noteFilename}`);
     }
+
+    // update package.json with newVersion and git tag
+    executeCmd(`yarn version --new-version=${newVersion}`);
 
     if (skipBuild) {
         info('SKIP build process since skipBuild is set...');
