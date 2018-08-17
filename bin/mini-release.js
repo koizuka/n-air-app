@@ -246,9 +246,6 @@ async function runScript() {
     }
     if (!await confirm(`Are you sure you want to release as version ${newVersion}?`, false)) sh.exit(0);
 
-    // update package.json with newVersion and git tag
-    executeCmd(`yarn version --new-version=${newVersion}`);
-
     if (!generateNoteTs) {
         info('skipping to generate notes.ts...');
     } else {
@@ -257,8 +254,11 @@ async function runScript() {
 
         fs.writeFileSync(noteFilename, patchNote);
         info(`generated patch-note file: ${noteFilename}.`)
-        executeCmd(`git commit --amend --no-edit ${noteFilename}`);
+        executeCmd(`git commit -m "note.ts ${newVersion}" ${noteFilename}`);
     }
+
+    // update package.json with newVersion and git tag
+    executeCmd(`yarn version --new-version=${newVersion}`);
 
     if (skipBuild) {
         info('SKIP build process since skipBuild is set...');
