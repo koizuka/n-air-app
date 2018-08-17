@@ -1,10 +1,10 @@
 import { IPatchNotes } from '.';
 
 export const notes: IPatchNotes = {
-  version: '0.1.20180816-1d',
-  title: '0.1.20180816-1d',
+  version: '0.1.20180817-1d',
+  title: '0.1.20180817-1d',
   notes: [
-    'ニコ生配信の場合の設定最適化機能を追加',
-    '更新内容のお知らせ表示追加'
+    'ニコ生最適化設定対象に「出力モード」追加',
+    '設定内にニコ生最適化設定の文言改善'
   ]
 };
