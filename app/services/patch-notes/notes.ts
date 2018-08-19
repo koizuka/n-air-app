@@ -1,10 +1,10 @@
 import { IPatchNotes } from '.';
 
 export const notes: IPatchNotes = {
-  version: '0.1.20180817-1d',
-  title: '0.1.20180817-1d',
+  version: '0.1.20180820-1d',
+  title: '0.1.20180820-1d',
   notes: [
-    'ニコ生最適化設定対象に「出力モード」追加',
-    '設定内にニコ生最適化設定の文言改善'
+    'BUGIIX: 設定/配信のURL,ストリームキーを起動時にまちがって消去していた',
+    'DESIGN: 設定/一般 配信中は一部設定変更できない旨警告'
   ]
 };
