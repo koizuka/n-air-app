@@ -239,10 +239,86 @@ export class NiconicoService extends StatefulService<INiconicoServiceState> impl
       .then(handleErrors)
       .then(response => response.text());
   }
+  private fetchGetPublishStatus2(): Promise<string> {
+    return Promise.resolve(
+      `<getpublishstatus status="ok" time="1532077326" multi="true">
+<list>
+<item>
+<stream>
+<id>lv314544536</id>
+<token>ad646fc7334c61a3aa39ea9e637d69101c7ade7a</token>
+<exclude>1</exclude>
+<provider_type>channel</provider_type>
+<base_time>1532074560</base_time>
+<open_time>1532074560</open_time>
+<start_time>1532074560</start_time>
+<end_time>1532086200</end_time>
+<allow_vote>1</allow_vote>
+<disable_adaptive_bitrate>1</disable_adaptive_bitrate>
+<is_reserved>1</is_reserved>
+<is_chtest>0</is_chtest>
+<for_mobile>1</for_mobile>
+<editstream_language>1</editstream_language>
+<test_extend_enabled>1</test_extend_enabled>
+<category>踊ってみた</category>
+<title>ああああ</title>
+<description>ああああ</description>
+</stream>
+<rtmp is_fms="1">
+<url>
+rtmp://nlpoca306.live.nicovideo.jp/origin/rt2_nicolive
+</url>
+<stream>
+omitted1
+</stream>
+<ticket/>
+<bitrate>2000</bitrate>
+</rtmp>
+</item>
+<item>
+<stream>
+<id>lv314545134</id>
+<token>4cd6239f5eee0d9aaac354188f67e290a5c8246c</token>
+<exclude>1</exclude>
+<provider_type>community</provider_type>
+<base_time>1532077306</base_time>
+<open_time>1532077306</open_time>
+<start_time>1532079106</start_time>
+<end_time>1532080906</end_time>
+<allow_vote>0</allow_vote>
+<disable_adaptive_bitrate>1</disable_adaptive_bitrate>
+<is_reserved>0</is_reserved>
+<is_chtest>0</is_chtest>
+<for_mobile>1</for_mobile>
+<editstream_language>1</editstream_language>
+<category>一般(その他)</category>
+<title>テスト</title>
+<description>ynが生放送を配信します。<br />コメント募集中です！</description>
+</stream>
+<rtmp is_fms="1">
+<url>
+rtmp://nlpoca309.live.nicovideo.jp/origin/rt2_nicolive
+</url>
+<stream>
+omitted2
+</stream>
+<ticket/>
+<bitrate>2000</bitrate>
+</rtmp>
+</item>
+</list>
+<user>
+<nickname>yn</nickname>
+<is_premium>1</is_premium>
+<user_id>67045656</user_id>
+<NLE>1</NLE>
+</user>
+</getpublishstatus>`);
+  }
 
   @requiresToken()
   fetchRawChannelInfo(): Promise<GetPublishStatusResult> {
-    return this.fetchGetPublishStatus()
+    return this.fetchGetPublishStatus2()
       .then(xml => GetPublishStatusResult.fromXml(xml))
       .then(result => {
         if (result.ok) {
