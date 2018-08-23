@@ -5,7 +5,7 @@ import { SettingsService } from '../settings';
 import { Inject } from '../../util/injector';
 import { handleErrors, requiresToken, authorizedHeaders } from '../../util/requests';
 import { UserService } from '../user';
-import { parseString } from 'xml2js';
+import { Builder, parseString } from 'xml2js';
 import { StreamingService, EStreamingState } from '../streaming';
 import { WindowsService } from 'services/windows';
 
@@ -97,12 +97,22 @@ class GetPublishStatusResult {
         this.items = [getpublishstatus as ProgramInfo];
       }
       this.user = new UserInfo(getpublishstatus['user'][0]);
+
+      // convert items[].stream[].description to XML string
+      const xml = new Builder({rootName: 'root', headless: true});
+      const removeRoot = (s: string): string => s.replace(/^<root>([\s\S]*)<\/root>$/, '$1');
+      for (const p of this.items) {
+        for (const s of p.stream) {
+          if ('description' in s) {
+            s.description = s.description.map(d => removeRoot(xml.buildObject(d)));
+          }
+        }
+      }
     }
     console.log(this);
   }
 
   static fromXml(xmlString: string): Promise<GetPublishStatusResult> {
-    // TODO: XMLをJSONに変換してしまうと、html tagの含まれたdescriptionがおかしくなってしまっている。
     return parseXml(xmlString).then(obj => new GetPublishStatusResult(obj));
   }
 }
@@ -383,7 +393,7 @@ omitted2
           const id = stream.id[0];
           r[id] = {
             title: stream.title[0],
-            description: JSON.stringify(stream.description[0]), // TODO ちゃんとXMLみえるようにする
+            description: stream.description[0],
             bitrate: rtmp.bitrate.length > 0 ? parseInt(rtmp.bitrate[0], 10) : undefined,
             url: rtmp.url[0],
             key: rtmp.stream[0]
