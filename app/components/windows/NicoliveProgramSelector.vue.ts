@@ -20,12 +20,12 @@ export default class NicoliveProgramSelector extends Vue {
   selectionInfo = (this.windowsService.getChildWindowOptions().queryParams || {}) as LiveProgramInfo;
   selectedId = '';
 
-  get disableOk() {
+  get disabledOk() {
     return this.selectedId === '';
   }
 
   ok() {
-    if (this.disableOk) {
+    if (this.disabledOk) {
       return;
     }
     this.streamingService.toggleStreamingAsync(this.selectedId);
