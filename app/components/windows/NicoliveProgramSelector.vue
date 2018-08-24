@@ -59,7 +59,7 @@
 
 .program {
   position: relative;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   border-bottom: 2px solid @bg-secondary;
   &:last-child {
     border-bottom: none;
@@ -70,6 +70,8 @@
     width: 100%;
     display: block;
     text-align: left;
+    margin-left: 0;
+    margin-right: 0;
     cursor: pointer;
     position: relative;
     z-index: 2;
@@ -80,7 +82,7 @@
       display: inline-block;
       font-size: 16px;
       text-indent: 1.3em;
-      margin-bottom: 8px;
+      margin-bottom: 0;
       width: 100%;
       overflow: hidden;
       white-space: nowrap;
@@ -90,6 +92,7 @@
     .description {
       display: inline-block;
       font-size: 14px;
+      margin-bottom: 0;
       width: 100%;
       overflow: hidden;
       white-space: nowrap;
@@ -99,8 +102,8 @@
         font-size: 12px;
         background-color: @text-secondary;
         color: @bg-primary;
-        border-radius: 3px;
-        padding: 0 2px;
+        border-radius: 2px;
+        padding: 2px 4px;
       }
     }
     &:before {
