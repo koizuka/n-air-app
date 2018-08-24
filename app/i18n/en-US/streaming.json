@@ -40,7 +40,7 @@
     "title": "Select a programs to start streaming on",
     "description": "There is more than one candidate program.<br/>Select one of the programs to start streaming on.",
     "cancel": "Cancel",
-    "done": "Determine the program to start streaming on."
+    "done": "Select a program"
   },
   "FPS": "FPS",
   "optimizeAndGoLive": "Optimize & Go Live",

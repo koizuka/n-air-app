@@ -45,6 +45,7 @@
 .caption {
   letter-spacing: .1em;
   font-size: 18px;
+  font-style: normal;
   text-align: center;
   color: @text-primary;
   margin-bottom: 16px;
