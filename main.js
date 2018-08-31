@@ -13,6 +13,7 @@ if (pjson.name === 'n-air-app-preview') {
 if (pjson.name === 'n-air-app-ipc') {
   process.env.NAIR_IPC = true;
 }
+process.env.NAIR_FORCE_AUTO_UPDATE = true;
 process.env.NAIR_VERSION = pjson.version;
 process.env.NAIR_PRODUCT_NAME = pjson.buildProductName;
 

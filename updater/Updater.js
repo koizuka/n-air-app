@@ -108,7 +108,8 @@ isUnskippable: ${this.updateState.isUnskippable}`);
     autoUpdater.on('update-downloaded', () => {
       this.updateState.installing = true;
       this.pushState();
-      autoUpdater.quitAndInstall();
+      // autoUpdater.quitAndInstall(); // DEBUG
+      this.skipUpdateAndContinue();
     });
 
     autoUpdater.on('error', () => {
