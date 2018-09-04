@@ -27,10 +27,10 @@
     "compile-tests": "tsc -p test",
     "screentest": "node test/screentest/runner.js"
   },
-  "buildProductName": "N Air",
+  "buildProductName": "N Air(社内版)",
   "build": {
     "appId": "jp.nicovideo.nair",
-    "productName": "N Air",
+    "productName": "N Air(社内版)",
     "icon": "media/images/icon.ico",
     "files": [
       "bundles",
