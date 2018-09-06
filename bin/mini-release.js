@@ -242,6 +242,13 @@ async function collectPullRequestMerges({octokit, owner, repo}, previousTag) {
     });
 }
 
+function uploadToSentry(org, project, release, artifactPath) {
+    const sentryCli = path.resolve('bin', 'node_modules/.bin/sentry-cli');
+    executeCmd(`${sentryCli} releases -o ${org} -p ${project} new ${release}`);
+    executeCmd(`${sentryCli} releases -o ${org} -p ${project} files ${release} upload-sourcemaps ${artifactPath}`);
+    executeCmd(`${sentryCli} releases -o ${org} -p ${project} finalize ${release}`);
+}
+
 /**
  * This is the main function of the script
  */
@@ -258,6 +265,10 @@ async function runScript() {
     const remote = 'dwango';
 
     const targetBranch = 'dwango-internal-release';
+
+    const sentryOrganization = 'n-air-app';
+    const sentryProject = 'n-air-app-dwango';
+
     const draft = true;
     const prerelease = true;
 
@@ -273,6 +284,7 @@ async function runScript() {
     checkEnv('NAIR_LICENSE_API_KEY');
     checkEnv('NAIR_GITHUB_TOKEN_INTERNAL');
     checkEnv('NAIR_GITHUB_TOKEN');
+    checkEnv('SENTRY_AUTH_TOKEN');
 
     info(`check whether remote ${remote} exists`);
     executeCmd(`git remote get-url ${remote}`)
@@ -487,6 +499,10 @@ async function runScript() {
 
         info(`Version ${newVersion} is released!`);
     }
+
+    info('uploading to sentry...');
+    uploadToSentry(sentryOrganization, sentryProject, newVersion, path.resolve('.', 'bundles'));
+
     // done.
 }
 
