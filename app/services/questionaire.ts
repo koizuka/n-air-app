@@ -223,13 +223,30 @@ export class QuestionaireService extends StatefulService<
         return false;
       }
 
-      const uuid = this.getUuid();
-      const hash = this.makeHash({ uuid, key });
-      console.log('uuid = ', uuid);
-      console.log('hash = ', hash);
+      let apiPromise: Promise<LicenseApiResponse>;
+      const errorCodePrefix = 'errorCode:';
+      if (key.startsWith(errorCodePrefix)) {
+        let errorCode = key.substr(errorCodePrefix.length) || 'ENQUETE-REQUIRED';
+        apiPromise = Promise.resolve({
+          meta: {
+            status: 403,
+            errorCode
+          },
+          data: {
+            url: 'http://cafe.koizuka.nicovideo.jp/nle_dev/dummy-enquete'
+          }
+        } as LicenseApiResponse);
+      } else {
+        const uuid = this.getUuid();
+        const hash = this.makeHash({ uuid, key });
+        console.log('uuid = ', uuid);
+        console.log('hash = ', hash);
+
+        apiPromise = this.callLicenseApi({ uuid, hash });
+      }
 
       // まずアンケートを出す必要があるかどうか判定する
-      return this.callLicenseApi({ uuid, hash }).then((result: LicenseApiResponse) => {
+      return apiPromise.then((result: LicenseApiResponse) => {
         console.log('getlicenseair response: ', result);
         switch (result.meta.status) {
           case 403:
