@@ -186,6 +186,7 @@ export class SettingsService extends StatefulService<ISettingsState>
   getSettingsFormData(categoryName: string): ISettingsSubCategory[] {
     if (categoryName === 'Audio') return this.getAudioSettingsFormData();
     const settings = nodeObs.OBS_settings_getSettings(categoryName) as ISettingsSubCategory[];
+    console.log('getSettingsFormData: ', settings);
 
     // Names of settings that are disabled because we
     // have not implemented them yet.
