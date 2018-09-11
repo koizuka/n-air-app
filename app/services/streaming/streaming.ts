@@ -119,6 +119,12 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
     }
 
     console.log('Start Streaming button: platform=' + JSON.stringify(this.userService.platform));
+    return this.optimizeForNiconicoAndStartStreaming({
+      asking: false,
+      url: 'test',
+      key: 'test',
+      bitrate: 6000
+    }, opts.mustShowOptimizationDialog); // DEBUG
     if (this.userService.isNiconicoLoggedIn()) {
       try {
         this.SET_PROGRAM_FETCHING(true);
