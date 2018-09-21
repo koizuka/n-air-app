@@ -213,8 +213,8 @@
     "name": "テキスト(FreeType 2)"
   },
   "monitor_capture": {
-    "name": "ディスプレイキャプチャ",
-    "description": "PCの画面全体をキャプチャします。",
+    "name": "画面キャプチャ",
+    "description": "ディスプレイの画面全体、もしくは一部の領域をキャプチャします。",
     "capture_cursor": {
       "name": "カーソルをキャプチャ"
     },
@@ -332,7 +332,7 @@
     "description": "内蔵マイクや外付けマイクなど、PCに接続されているデバイスからの音声をキャプチャします。",
     "device_id": {
       "name": "デバイス",
-      "default": "標準"
+      "default": "既定"
     },
     "use_device_timing": {
       "name": "デバイスのタイムスタンプを使用"
@@ -343,7 +343,7 @@
     "description": "デスクトップ上で再生中の音声をキャプチャします。",
     "device_id": {
       "name": "デバイス",
-      "default": "標準"
+      "default": "既定"
     },
     "use_device_timing": {
       "name": "デバイスのタイムスタンプを使用"
@@ -353,12 +353,36 @@
     "name": "シーン",
     "description": "既存のシーンをソースとして新たに追加します。"
   },
-  "blackmagicDevice": {
-    "name": "Blackmagicデバイス"
+  "decklink-input": {
+    "name": "Blackmagicデバイス",
+    "description": "シーンにBlackmagicデバイスからの映像・音声を追加します"
   },
   "ndi_source": {
     "name": "NDI™ ソース",
-    "description": "NDIの出力ストリームをキャプチャ－して配信することができます。"
+    "description": "NDIの出力ストリームをキャプチャします。",
+    "ndi_source_name": {
+      "name": "ソース名"
+    },
+    "ndi_bw_mode": {
+      "name": "帯域",
+      "0": "最高",
+      "1": "最低",
+      "2": "音声のみ"
+    },
+    "ndi_sync": {
+      "name": "同期",
+      "0": "内部",
+      "1": "ネットワーク"
+    },
+    "ndi_recv_hw_accel": {
+      "name": "ハードウェアアクセラレーションの使用を許可する"
+    },
+    "ndi_fix_alpha_blending": {
+      "name": "アルファブレンドを固定する（このソースにフィルターを追加する）"
+    },
+    "ndi_website": {
+      "name": "NDI.NewTek.com"
+    }
   },
   "openvr_capture": {
     "name": "OpenVR Capture"

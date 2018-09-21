@@ -34,10 +34,6 @@ const windowStateKeeper = require('electron-window-state');
 
 app.disableHardwareAcceleration();
 
-if (process.argv.includes('--clearCacheDir')) {
-  rimraf.sync(app.getPath('userData'));
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // Main Program
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +42,13 @@ function log(...args) {
   if (!process.env.NAIR_DISABLE_MAIN_LOGGING) {
     console.log(...args);
   }
+}
+
+if (process.argv.includes('--clearCacheDir')) {
+  // __installer.exe は electron-updater 差分アップデートの比較元になるので消してはいけない
+  const rmPath = path.join(app.getPath('appData'), 'n-air-app', '!(__installer.exe)');
+  log('clear cache directory!: ', rmPath);
+  rimraf.sync(rmPath);
 }
 
 // Windows
@@ -442,6 +445,22 @@ ipcMain.on('window-closeChildWindow', (event) => {
 
 ipcMain.on('window-focusMain', () => {
   mainWindow.focus();
+});
+
+function preventClose(e) {
+  if (!shutdownStarted) {
+    e.preventDefault();
+  }
+}
+
+ipcMain.on('window-preventClose', (event, id) => {
+  const window = BrowserWindow.fromId(id);
+  window.addListener('close', preventClose);
+});
+
+ipcMain.on('window-allowClose', (event, id) => {
+  const window = BrowserWindow.fromId(id);
+  window.removeListener('close', preventClose);
 });
 
 // The main process acts as a hub for various windows
