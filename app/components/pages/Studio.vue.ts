@@ -8,6 +8,7 @@ import { TransitionsService } from 'services/transitions';
 import Display from 'components/shared/Display.vue';
 import StudioModeControls from 'components/StudioModeControls.vue';
 import { ScenesService } from 'services/scenes';
+import Split from 'split.js';
 
 @Component({
   components: {
@@ -31,6 +32,21 @@ export default class Studio extends Vue {
   sizeCheckInterval: number;
 
   mounted() {
+    Split(['#display', '#control'], {
+      sizes: [75, 25],
+      direction: 'vertical',
+      // cursor: 'row-resize',
+      elementStyle: function(dimension, size, gutterSize) {
+        return {
+          'flex-basis': 'calc(' + size + '% - ' + gutterSize + 'px)'
+        }
+      },
+      gutterStyle: function(dimension, gutterSize) {
+        return {
+          'flex-basis': gutterSize + 'px'
+        }
+      }
+    });
     this.sizeCheckInterval = window.setInterval(() => {
       if (this.studioMode) {
         const rect = this.$refs.studioModeContainer.getBoundingClientRect();
