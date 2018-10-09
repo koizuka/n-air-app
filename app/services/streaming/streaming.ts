@@ -246,7 +246,7 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
           queryParams: settings,
           size: {
             width: 500,
-            height: 430
+            height: 480
           }
         });
       } else {
