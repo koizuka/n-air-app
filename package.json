@@ -52,7 +52,7 @@
     "publish": {
       "provider": "generic",
       "channel": "latest",
-      "url": "https://n-air-app.nicovideo.jp/download/windows"
+      "url": "https://n-air-app.dev.nicovideo.jp/download/windows"
     },
     "nsis": {
       "license": "AGREEMENT.sjis",

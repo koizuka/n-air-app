@@ -76,7 +76,7 @@ async function uploadS3File(name, filePath) {
     const stream = fs.createReadStream(filePath);
     const upload = new AWS.S3.ManagedUpload({
       params: {
-        Bucket: process.env.RELEASE_S3_BUCKET_NAME,
+        Bucket: process.env.RELEASE_DWANGO_S3_BUCKET_NAME,
         Key: `windows/${name}`,
         Body: stream
       },
@@ -343,7 +343,7 @@ async function runScript() {
     checkEnv('NAIR_GITHUB_TOKEN_INTERNAL');
     checkEnv('NAIR_GITHUB_TOKEN');
     checkEnv('SENTRY_AUTH_TOKEN');
-    checkEnv('RELEASE_S3_BUCKET_NAME');
+    checkEnv('RELEASE_DWANGO_S3_BUCKET_NAME');
     checkEnv('AWS_ACCESS_KEY_ID');
     checkEnv('AWS_SECRET_ACCESS_KEY');
 
