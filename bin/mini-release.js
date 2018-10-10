@@ -119,7 +119,83 @@ function generateNewVersion(previousTag, now = Date.now()) {
         date = today;
         ord = 1;
     }
-    return `${major}.${minor}.${date}-${ord}`;
+    return `${major}.${minor}.${date}-${ord}d`;
+}
+
+function generateNotesTsContent(version, title, notes) {
+    const patchNote = `import { IPatchNotes } from '.';
+
+export const notes: IPatchNotes = {
+  version: '${version}',
+  title: '${title}',
+  notes: [
+${notes.trim().split('\n').map(s => `    '${s}'`).join(',\n')}
+  ]
+};
+`;
+    info(`patch-note: '${patchNote}'`);
+    return patchNote;
+}
+
+function splitToLines(lines) {
+    if (typeof lines === 'string') {
+        lines = lines.split(/\r?\n/g);
+    }
+    return lines;
+}
+
+function readPatchNoteFile(patchNoteFileName) {
+    try {
+        const lines = splitToLines(fs.readFileSync(patchNoteFileName, {encoding: 'utf8'}));
+        const version = lines.shift();
+        return {
+            version,
+            lines
+        };
+    } catch (err) {
+        if (err.code !== 'ENOENT') throw err;
+        return {
+            version: '',
+            lines: []
+        };
+    }
+}
+
+function writePatchNoteFile(patchNoteFileName, version, lines) {
+    lines = splitToLines(lines);
+    const body = [version, ...lines].join('\n');
+    fs.writeFileSync(patchNoteFileName, body);
+}
+
+function getTagCommitId(tag) {
+    return executeCmd(`git rev-parse -q --verify "refs/tags/${tag}" || cat /dev/null`, {silent: true}).stdout;
+}
+
+async function collectPullRequestMerges({octokit, owner, repo}, previousTag) {
+    const merges = executeCmd(`git log --oneline --merges ${previousTag}..`, {silent: true}).stdout;
+
+    let promises = [];
+    for (const line of merges.split(/\r?\n/)) {
+        info(line);
+        const pr = line.match(/.*Merge pull request #([0-9]*).*/);
+        if (!pr || pr.length < 2) {
+            continue;
+        }
+        const number = parseInt(pr[1], 10);
+        info(number);
+        promises.push(octokit.pullRequests.get({owner, repo, number}).catch(e => { info(e); return {data: {}}}));
+    }
+
+    return Promise.all(promises).then(results => {
+        let summary = [];
+        for (const result of results) {
+            const data = result.data;
+            if ('title' in data) {
+                summary.push(`${data.title} (#${data.number}) by ${data.user.login}\n`);
+            }
+        }
+        return summary.join('');
+    });
 }
 
 function generateNotesTsContent(version, title, notes) {
@@ -235,20 +311,21 @@ function uploadToSentry(org, project, release, artifactPath) {
  * This is the main function of the script
  */
 async function runScript() {
-    info(colors.magenta('|----------------------------------|'));
-    info(colors.magenta('| N Air Interactive Release Script |'));
-    info(colors.magenta('|----------------------------------|'));
+    info(colors.magenta('|--------------------------------------------|'));
+    info(colors.magenta('| N Air Interactive Release Script(INTERNAL) |'));
+    info(colors.magenta('|--------------------------------------------|'));
 
-    const githubApiServer = 'https://api.github.com';
+    // const githubApiServer = 'https://api.github.com';
+    const githubApiServer = 'https://api.github.o-in.dwango.co.jp';
 
     const organization = 'n-air-app';
-    const repository = 'n-air-app';
-    const remote = 'origin';
+    const repository = 'n-air-app-dwango';
+    const remote = 'dwango';
 
-    const targetBranch = 'n-air_development';
+    const targetBranch = 'dwango-internal-release';
 
     const sentryOrganization = 'n-air-app';
-    const sentryProject = 'n-air-app';
+    const sentryProject = 'n-air-app-dwango';
 
     const draft = true;
     const prerelease = false;
@@ -263,6 +340,7 @@ async function runScript() {
     checkEnv('CSC_LINK');
     checkEnv('CSC_KEY_PASSWORD');
     checkEnv('NAIR_LICENSE_API_KEY');
+    checkEnv('NAIR_GITHUB_TOKEN_INTERNAL');
     checkEnv('NAIR_GITHUB_TOKEN');
     checkEnv('SENTRY_AUTH_TOKEN');
     checkEnv('RELEASE_S3_BUCKET_NAME');
@@ -443,7 +521,7 @@ async function runScript() {
 
     octokit.authenticate({
         type: 'token',
-        token: process.env.NAIR_GITHUB_TOKEN
+        token: process.env.NAIR_GITHUB_TOKEN_INTERNAL
     });
 
     info(`creating release ${newTag}...`);

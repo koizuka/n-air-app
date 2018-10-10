@@ -1,12 +1,12 @@
 {
-  "name": "n-air-app",
+  "name": "n-air-app-dwango",
   "description": "Streaming application for niconico",
   "author": "DWANGO Co.,Ltd.",
   "license": "GPL-3.0",
   "//": {
     "version": "0.9.3-preview.3"
   },
-  "version": "1.0.20181001-2",
+  "version": "0.1.20180928-2d",
   "main": "main.js",
   "scripts": {
     "compile": "yarn clear && webpack-cli --progress --mode development",
@@ -28,10 +28,10 @@
     "screentest": "node test/screentest/runner.js",
     "version": "git add app/services/patch-notes/notes.ts"
   },
-  "buildProductName": "N Air",
+  "buildProductName": "N Air(社内版)",
   "build": {
     "appId": "jp.nicovideo.nair",
-    "productName": "N Air",
+    "productName": "N Air(社内版)",
     "icon": "media/images/icon.ico",
     "files": [
       "bundles",

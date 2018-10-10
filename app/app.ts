@@ -32,15 +32,15 @@ let sentryDsn = 'https://1cb5cdf6a93c466dad570861b8c82b61@sentry.io/1262580';
 
 if (isProduction) {
   // This is the production DSN
-  sentryDsn = 'https://35a02d8ebec14fd3aadc9d95894fabcf@sentry.io/1246812';
+  // sentryDsn = 'https://35a02d8ebec14fd3aadc9d95894fabcf@sentry.io/1246812';
 
   electron.crashReporter.start({
-    productName: 'n-air-app',
+    productName: 'n-air-app-dwango',
     companyName: 'n-air-app',
     submitURL:
       'https://n-air-app.sp.backtrace.io:8443/post?' +
       'format=minidump&' +
-      'token=66abc2eda8a8ead580b825dd034d9b4f9da4d54eeb312bf8ce713571e1b1d35f',
+      'token=ed9b09d0153bd308b7f10a2479501ca9ef8482e09de6960e73353024c4cbc280',
     extra: {
       version: nAirVersion,
       processType: 'renderer'
