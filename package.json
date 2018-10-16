@@ -6,7 +6,7 @@
   "//": {
     "version": "0.9.3-preview.3"
   },
-  "version": "0.1.20180928-2d",
+  "version": "1.0.20181012-3d",
   "main": "main.js",
   "scripts": {
     "compile": "yarn clear && webpack-cli --progress --mode development",
@@ -48,12 +48,12 @@
       "LICENSE",
       "AGREEMENT.sjis"
     ],
+    "detectUpdateChannel": false,
     "publish": {
-      "provider": "github",
-      "owner": "n-air-app",
-      "repo": "n-air-app",
-      "host": "github.o-in.dwango.co.jp",
-      "releaseType": "draft"
+      "provider": "generic",
+      "useMultipleRangeRequest": false,
+      "channel": "latest",
+      "url": "https://n-air-app.dev.nicovideo.jp/download/windows"
     },
     "nsis": {
       "license": "AGREEMENT.sjis",
