@@ -3,11 +3,13 @@ import { ISettingsSubCategory } from './settings-api';
 
 export enum OptimizationKey {
     outputMode = 'outputMode',
+    rateControl = 'rateControl',
     videoBitrate = 'videoBitrate',
     audioBitrate = 'audioBitrate',
     quality = 'quality',
     colorSpace = 'colorSpace',
-    fps = 'fps',
+    fpsType = 'fpsType',
+    fpsCommon = 'fpsCommon',
     encoder = 'encoder',
     keyframeInterval = 'keyframeInterval',
     encoderPreset = 'encoderPreset',
@@ -18,13 +20,15 @@ export enum OptimizationKey {
 
 // OptimizationKey のキーと完全対応していること
 export type OptimizeSettings = {
-    outputMode?: string
+    outputMode?: 'Simple' | 'Advanced'
+    rateControl?: 'CBR' | 'VBR' | 'ABR' | 'CRF'
     videoBitrate?: number
     audioBitrate?: string
     quality?: string
     colorSpace?: string
-    fps?: string
-    encoder?: string
+    fpsType?: 'Common FPS Values' | 'Integer FPS Value' | 'Fractional FPS Value'
+    fpsCommon?: string
+    encoder?: 'obs_x264' | 'obs_qsv11'
     keyframeInterval?: number
     encoderPreset?: string
     profile?: string
@@ -59,20 +63,6 @@ const definitionParams: DefinitionParam[] = [
             value: 'Advanced',
             params: [
                 {
-                    key: OptimizationKey.videoBitrate,
-                    category: CategoryName.output,
-                    subCategory: 'Streaming',
-                    setting: 'bitrate',
-                    label: 'settings.videoBitrate',
-                },
-                {
-                    key: OptimizationKey.audioBitrate,
-                    category: CategoryName.output,
-                    subCategory: 'Audio - Track 1',
-                    setting: 'Track1Bitrate',
-                    label: 'settings.audioBitrate',
-                },
-                {
                     key: OptimizationKey.encoder,
                     category: CategoryName.output,
                     subCategory: 'Streaming',
@@ -82,11 +72,44 @@ const definitionParams: DefinitionParam[] = [
                         value: 'obs_x264',
                         params: [
                             {
+                                key: OptimizationKey.rateControl,
+                                category: CategoryName.output,
+                                subCategory: 'Streaming',
+                                setting: 'rate_control',
+                                lookupValueName: true,
+                                dependents: [{
+                                    value: 'CBR',
+                                    params: [
+                                        {
+                                            key: OptimizationKey.videoBitrate,
+                                            category: CategoryName.output,
+                                            subCategory: 'Streaming',
+                                            setting: 'bitrate',
+                                            label: 'settings.videoBitrate',
+                                        },
+                                    ]
+                                }]
+                            },
+                            {
+                                key: OptimizationKey.keyframeInterval,
+                                category: CategoryName.output,
+                                subCategory: 'Streaming',
+                                label: 'settings.keyframeInterval',
+                                setting: 'keyint_sec',
+                            },
+                            {
                                 key: OptimizationKey.encoderPreset,
                                 category: CategoryName.output,
                                 subCategory: 'Streaming',
                                 setting: 'preset',
                                 label: 'settings.encoderPreset',
+                                lookupValueName: true,
+                            },
+                            {
+                                key: OptimizationKey.profile,
+                                category: CategoryName.output,
+                                subCategory: 'Streaming',
+                                setting: 'profile',
                                 lookupValueName: true,
                             },
                             {
@@ -100,24 +123,17 @@ const definitionParams: DefinitionParam[] = [
                     }]
                 },
                 {
-                    key: OptimizationKey.keyframeInterval,
-                    category: CategoryName.output,
-                    subCategory: 'Streaming',
-                    label: 'settings.keyframeInterval',
-                    setting: 'keyint_sec',
-                },
-                {
-                    key: OptimizationKey.profile,
-                    category: CategoryName.output,
-                    subCategory: 'Streaming',
-                    setting: 'profile',
-                    lookupValueName: true,
-                },
-                {
                     key: OptimizationKey.audioTrackIndex,
                     category: CategoryName.output,
                     subCategory: 'Streaming',
                     setting: 'TrackIndex',
+                },
+                {
+                    key: OptimizationKey.audioBitrate,
+                    category: CategoryName.output,
+                    subCategory: 'Audio - Track 1',
+                    setting: 'Track1Bitrate',
+                    label: 'settings.audioBitrate',
                 },
             ]
         }]
@@ -137,11 +153,23 @@ const definitionParams: DefinitionParam[] = [
         setting: 'ColorSpace',
     },
     {
-        key: OptimizationKey.fps,
+        key: OptimizationKey.fpsType,
         category: CategoryName.video,
         subCategory: 'Untitled',
-        setting: 'FPSCommon',
-        label: 'streaming.FPS',
+        setting: 'FPSType',
+        lookupValueName: true,
+        dependents: [{
+            value: 'Common FPS Values',
+            params: [
+                {
+                    key: OptimizationKey.fpsCommon,
+                    category: CategoryName.video,
+                    subCategory: 'Untitled',
+                    setting: 'FPSCommon',
+                    label: 'streaming.FPS',
+                },
+            ]
+        }]
     },
 ];
 
@@ -367,18 +395,33 @@ export class Optimizer {
         }
     }
 
-    private *getValues(definitions: DefinitionParam[]): IterableIterator<{}> {
+    private *getValues(definitions: DefinitionParam[]): IterableIterator<OptimizeSettings> {
         for (const item of definitions) {
+            let changed = false;
             const value = this.findValue(item);
             yield { [item.key]: value };
             if (item.dependents) {
+                // cacheオブジェクトの参照ではその後の変更で書き換わってしまうので、元の値をディープコピーして保存する
+                let lastCategorySettings = JSON.parse(JSON.stringify(this.getCategory(item.category)));
+
                 for (const dependent of item.dependents) {
                     this.setValue(item, dependent.value);
+                    if (value !== dependent.value) {
+                        changed = true;
+                    }
                     for (const current of this.getValues(dependent.params)) {
                         yield current;
                     }
                 }
-                this.setValue(item, value);
+
+                if (changed) {
+                    // まず値を変更した上で書き戻し、
+                    this.setValue(item, value);
+                    this.writeBackCategory(item.category);
+                    // 次に元の値群を書き戻すことで依存値が書き戻せる
+                    this.categoryCache.set(item.category, lastCategorySettings);
+                    this.updateCategory(item.category);
+                }
             }
         }
     }

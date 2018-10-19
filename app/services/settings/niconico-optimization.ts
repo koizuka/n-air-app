@@ -28,11 +28,13 @@ export function getBestSettingsForNiconico(options: { bitrate: number }): Optimi
 
     return {
         outputMode: 'Advanced',
+        rateControl: 'CBR',
         videoBitrate: (options.bitrate - audioBitrate),
         audioBitrate: audioBitrate.toString(10),
         quality: quality,
         colorSpace: '709',
-        fps: '30',
+        fpsType: 'Common FPS Values',
+        fpsCommon: '30',
         encoder: 'obs_x264',
         keyframeInterval: 300,
         encoderPreset: 'ultrafast',
