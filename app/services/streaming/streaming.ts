@@ -61,6 +61,7 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
   powerSaveId: number;
 
   static initialState = {
+    programFetching: false,
     streamingStatus: EStreamingState.Offline,
     streamingStatusTime: new Date().toISOString(),
     recordingStatus: ERecordingState.Offline,
@@ -111,6 +112,7 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
     console.log('Start Streaming button: platform=' + JSON.stringify(this.userService.platform));
     if (this.userService.isNiconicoLoggedIn()) {
       try {
+        this.SET_PROGRAM_FETCHING(true);
         const setting = await this.userService.updateStreamSettings(programId);
         if (setting.asking) {
           return;
@@ -151,6 +153,8 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
             done => resolve(done)
           );
         });
+      } finally {
+        this.SET_PROGRAM_FETCHING(false);
       }
     }
     this.toggleStreaming();
@@ -263,7 +267,7 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
           }
         });
       } else {
-        this.settingsService.optimizeForNiconico(settings.delta);
+        this.settingsService.optimizeForNiconico(settings.best);
         this.toggleStreaming();
       }
     } else {
@@ -425,6 +429,11 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
 
       alert(errorText);
     }
+  }
+
+  @mutation()
+  private SET_PROGRAM_FETCHING(status: boolean) {
+    this.state.programFetching = status;
   }
 
   @mutation()
