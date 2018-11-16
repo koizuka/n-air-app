@@ -16,8 +16,7 @@ import { $t } from 'services/i18n';
  */
 export class CustomizationService
   extends PersistentStatefulService<ICustomizationServiceState>
-  implements ICustomizationServiceApi
-{
+  implements ICustomizationServiceApi {
 
   static defaultState: ICustomizationServiceState = {
     performanceMode: false,
@@ -25,6 +24,7 @@ export class CustomizationService
     optimizeForNiconico: true,
     showOptimizationDialogForNiconico: true,
     pollingPerformanceStatistics: true,
+    enableReconnection: false,
     experimental: {
       // put experimental features here
     }
@@ -75,6 +75,13 @@ export class CustomizationService
 
   setPollingPerformanceStatistics(activate: boolean) {
     this.setSettings({ pollingPerformanceStatistics: activate });
+  }
+
+  get enableReconnetion() {
+    return this.state.enableReconnection;
+  }
+  setEnableReconnection(enable: boolean) {
+    this.setSettings({ enableReconnection: enable });
   }
 
   getSettingsFormData(): TFormData {

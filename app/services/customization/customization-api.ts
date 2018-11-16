@@ -7,6 +7,7 @@ export interface ICustomizationServiceState {
   optimizeForNiconico: boolean;
   showOptimizationDialogForNiconico: boolean;
   pollingPerformanceStatistics: boolean;
+  enableReconnection: boolean;
   experimental: any;
 }
 

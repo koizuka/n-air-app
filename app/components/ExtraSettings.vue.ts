@@ -41,6 +41,18 @@ export default class ExtraSettings extends Vue {
     electron.clipboard.writeText(text);
   }
 
+  get enableReconnectionModel(): IFormInput<boolean> {
+    return {
+      name: 'enable_reconnection',
+      description: $t('settings.enableReconnection'),
+      value: this.customizationService.state.enableReconnection,
+      enabled: this.streamingService.isStreamReconnecting === false
+    };
+  }
+  setEnableReconnection(model: IFormInput<boolean>) {
+    this.customizationService.setEnableReconnection(model.value);
+  }
+
   get optimizeForNiconicoModel(): IFormInput<boolean> {
     return {
       name: 'optimize_for_niconico',

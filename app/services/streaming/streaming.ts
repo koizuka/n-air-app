@@ -88,6 +88,10 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
     return this.state.recordingStatus !== ERecordingState.Offline;
   }
 
+  get isStreamReconnecting() {
+    return this.state.streamingStatus === EStreamingState.Reconnecting;
+  }
+
   /**
    * @deprecated Use toggleStreaming instead
    */

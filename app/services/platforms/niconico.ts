@@ -9,6 +9,7 @@ import { UserService } from '../user';
 import { Builder, parseString } from 'xml2js';
 import { StreamingService, EStreamingState } from '../streaming';
 import { WindowsService } from 'services/windows';
+import { CustomizationService } from 'services/customization';
 
 export type INiconicoProgramSelection = {
   info: LiveProgramInfo
@@ -100,7 +101,7 @@ class GetPublishStatusResult {
       this.user = new UserInfo(getpublishstatus['user'][0]);
 
       // convert items[].stream[].description to XML string
-      const xml = new Builder({rootName: 'root', headless: true});
+      const xml = new Builder({ rootName: 'root', headless: true });
       const removeRoot = (s: string): string => s.replace(/^<root>([\s\S]*)<\/root>$/, '$1');
       for (const p of this.items) {
         for (const s of p.stream) {
@@ -125,6 +126,7 @@ export class NiconicoService extends Service implements IPlatformService {
   @Inject() userService: UserService;
   @Inject() streamingService: StreamingService;
   @Inject() windowsService: WindowsService;
+  @Inject() customizationService: CustomizationService;
 
   authWindowOptions: Electron.BrowserWindowConstructorOptions = {
     width: 800,
@@ -192,24 +194,21 @@ export class NiconicoService extends Service implements IPlatformService {
     return this.streamingService.state.streamingStatus;
   }
 
-  init() {
-    console.log('niconico.init');
-    this.streamingService.streamingStatusChange.subscribe(() => {
-      console.log('streamingService.streamingStatusChange! ', this.streamingStatus);
-      if (this.streamingStatus === EStreamingState.Reconnecting) {
-        console.log('reconnecting - checking stream key');
-        this.fetchLiveProgramInfo(this.channelId).then(info => {
-          let key = '';
-          if (this.channelId && this.channelId in info) {
-            key = info[this.channelId].key;
-          }
-          if (key === '') {
-            console.log('niconico programas has ended! stopping streaming.');
-            this.streamingService.stopStreaming();
-          }
-        });
+  /**
+   * 番組が放送中であるかを確認する(再接続判定用)
+   * @retval true 番組が有効
+   */
+  checkStillOnAir(): Promise<boolean> {
+    return this.fetchLiveProgramInfo(this.channelId).then(info => {
+      let key = '';
+      if (this.channelId && this.channelId in info) {
+        key = info[this.channelId].key;
       }
+      return (key != '');
     });
+  }
+
+  init() {
   }
 
   /**

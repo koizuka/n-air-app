@@ -2,9 +2,10 @@ import { StatefulService, mutation } from 'services/stateful-service';
 import { getPlatformService } from 'services/platforms';
 import { UserService } from './user';
 import { Inject } from 'util/injector';
-import { StreamingService } from '../services/streaming';
+import { StreamingService, EStreamingState } from '../services/streaming';
 import { HostsService } from 'services/hosts';
 import { NiconicoService } from './platforms/niconico';
+import { CustomizationService } from './customization';
 
 
 interface IStreamInfoServiceState {
@@ -25,6 +26,7 @@ export class StreamInfoService extends StatefulService<IStreamInfoServiceState> 
   @Inject() userService: UserService;
   @Inject() streamingService: StreamingService;
   @Inject() hostsService: HostsService;
+  @Inject() customizationService: CustomizationService;
 
   static initialState: IStreamInfoServiceState = {
     viewerCount: 0,
@@ -33,6 +35,9 @@ export class StreamInfoService extends StatefulService<IStreamInfoServiceState> 
 
   platformStatusInterval: number;
 
+  get streamingStatus() {
+    return this.streamingService.state.streamingStatus;
+  }
 
   init() {
     this.platformStatusInterval = window.setInterval(() => {
@@ -60,6 +65,32 @@ export class StreamInfoService extends StatefulService<IStreamInfoServiceState> 
         }
       }
     }, PLATFORM_STATUS_UPDATE_INTERVAL);
+
+    this.streamingService.streamingStatusChange.subscribe(() => {
+      console.log('streamingService.streamingStatusChange! ', this.streamingStatus);
+      if (this.streamingStatus === EStreamingState.Reconnecting) {
+        if (this.customizationService.enableReconnetion) {
+          if (this.userService.isLoggedIn()) {
+            const platform = getPlatformService(this.userService.platform.type);
+            if (platform.checkStillOnAir) {
+              console.log('reconnecting - checking program status');
+              platform.checkStillOnAir().then(live => {
+                if (!live) {
+                  console.log(`stop reconnection: ${this.userService.platform.type} programas has ended.`);
+                  this.streamingService.stopStreaming();
+                }
+              }).catch(e => {
+                console.error(`stop reconnection: ${this.userService.platform.type} checkStillOnAir() error: ${e}.`);
+                this.streamingService.stopStreaming();
+              });
+            }
+          }
+        } else {
+          console.log('stop reconnection: reconnection is disabled.');
+          this.streamingService.stopStreaming();
+        }
+      }
+    });
   }
 
   @mutation()

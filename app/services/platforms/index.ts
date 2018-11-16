@@ -25,6 +25,8 @@ export interface IPlatformService {
   logout?: () => Promise<void>;
 
   getUserPageURL?: () => string;
+
+  checkStillOnAir?: () => Promise<boolean>;
 }
 
 export interface IPlatformAuth {
