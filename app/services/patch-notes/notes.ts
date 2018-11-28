@@ -1,9 +1,9 @@
 import { IPatchNotes } from '.';
 
 export const notes: IPatchNotes = {
-  version: '1.0.20181127-2d',
-  title: '1.0.20181127-2d',
+  version: '1.0.20181129-1d',
+  title: '1.0.20181129-1d',
   notes: [
-    '追加: パフォーマンス情報の定期取得を無効にする設定を追加 (#206) by berlysia'
+    '修正: 出力モードが詳細だと、「配信時に自動的に録画する」がonだと配信が開始できない現象を修正 (#207) by koizuka'
   ]
 };
