@@ -138,9 +138,9 @@ function startApp() {
 
   const mainWindowIsVisible = electron.screen.getAllDisplays().some(display => (
     display.workArea.x < mainWindowState.x + mainWindowState.width &&
-    display.workArea.x + display.workArea.width > mainWindowState.x &&
+    mainWindowState.x < display.workArea.x + display.workArea.width &&
     display.workArea.y < mainWindowState.y &&
-    display.workArea.y < mainWindowState.y + mainWindowState.height
+    mainWindowState.y < display.workArea.y + display.workArea.height
   ));
 
   mainWindow = new BrowserWindow({
@@ -207,6 +207,8 @@ function startApp() {
 
   // Pre-initialize the child window
   childWindow = new BrowserWindow({
+    parent: mainWindow,
+    modal: true,
     show: false,
     frame: false
   });
@@ -395,9 +397,16 @@ ipcMain.on('window-showChildWindow', (event, windowOptions) => {
       childWindow.setMinimumSize(width, height);
 
       if (windowOptions.center) {
-        const overflowsVertically = Math.max(0, mainWindowBounds.y + height - targetWorkArea.y - targetWorkArea.height);
-        const childX = (mainWindowBounds.x + (mainWindowBounds.width / 2)) - (width / 2);
-        const childY = mainWindowBounds.y - overflowsVertically;
+        const baseChildY = mainWindowBounds.y;
+        const overflowsBottom = Math.max(0, baseChildY + height - targetWorkArea.y - targetWorkArea.height);
+        const overflowsTop = Math.max(0, targetWorkArea.y - baseChildY);
+
+        const baseChildX = (mainWindowBounds.x + (mainWindowBounds.width / 2)) - (width / 2);
+        const overflowsRight = Math.max(0, baseChildX + width - targetWorkArea.x - targetWorkArea.width);
+        const overflowsLeft = Math.max(0, targetWorkArea.x - baseChildX);
+
+        const childX = baseChildX + overflowsLeft - overflowsRight;
+        const childY = baseChildY + overflowsTop - overflowsBottom;
 
         childWindow.setBounds({
           x: Math.floor(childX),
