@@ -2,7 +2,6 @@ import { StatefulService, mutation } from 'services/stateful-service';
 import { ObsApiService, EOutputCode } from 'services/obs-api';
 import { Inject } from 'util/injector';
 import moment from 'moment';
-import { padStart } from 'lodash';
 import { SettingsService } from 'services/settings';
 import { WindowsService } from 'services/windows';
 import { Subject } from 'rxjs/Subject';
@@ -16,7 +15,6 @@ import {
 import { UsageStatisticsService } from 'services/usage-statistics';
 import { $t } from 'services/i18n';
 import { CustomizationService } from 'services/customization';
-import { StreamInfoService } from 'services/stream-info';
 import { UserService } from 'services/user';
 import { IStreamingSetting } from '../platforms';
 import { OptimizedSettings } from 'services/settings/optimizer';
@@ -49,7 +47,6 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
   @Inject() userService: UserService;
   @Inject() windowsService: WindowsService;
   @Inject() usageStatisticsService: UsageStatisticsService;
-  @Inject() streamInfoService: StreamInfoService;
   @Inject() customizationService: CustomizationService;
 
   streamingStatusChange = new Subject<EStreamingState>();
@@ -69,6 +66,8 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
   };
 
   init() {
+    super.init();
+
     this.obsApiService.nodeObs.OBS_service_connectOutputSignals(
       (info: IOBSOutputSignalInfo) => {
         this.handleOBSOutputSignal(info);
@@ -103,7 +102,17 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
   }
 
   // 配信開始ボタンまたはショートカットキーによる配信開始(対話可能)
-  async toggleStreamingAsync(programId: string = '') {
+  async toggleStreamingAsync(
+    options: {
+      programId?: string,
+      mustShowOptimizationDialog?: boolean
+    } = {}
+  ) {
+    const opts = Object.assign({
+      programId: '',
+      mustShowOptimizationDialog: false
+    }, options);
+
     if (this.isStreaming) {
       this.toggleStreaming();
       return;
@@ -113,7 +122,7 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
     if (this.userService.isNiconicoLoggedIn()) {
       try {
         this.SET_PROGRAM_FETCHING(true);
-        const setting = await this.userService.updateStreamSettings(programId);
+        const setting = await this.userService.updateStreamSettings(opts.programId);
         if (setting.asking) {
           return;
         }
@@ -134,7 +143,7 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
           });
         }
         if (this.customizationService.optimizeForNiconico) {
-          return this.optimizeForNiconico(setting);
+          return this.optimizeForNiconicoAndStartStreaming(setting, opts.mustShowOptimizationDialog);
         }
       } catch (e) {
         const message = e instanceof Response
@@ -229,7 +238,12 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
     return Math.floor(height); // floorしないと死ぬ
   }
 
-  private async optimizeForNiconico(streamingSetting: IStreamingSetting) {
+  /**
+   * ニコニコ生放送用設定最適化を行い、配信を開始する。この際、必要なら最適化ダイアログ表示を行う。
+   * @param streamingSetting 番組の情報から得られる最適化の前提となる情報
+   * @param mustShowDialog trueなら、設定に変更が必要ない場合や、最適化ダイアログを表示しない接敵のときであっても最適化ダイアログを表示する。
+   */
+  private async optimizeForNiconicoAndStartStreaming(streamingSetting: IStreamingSetting, mustShowDialog: boolean) {
     if (streamingSetting.bitrate === undefined) {
       return new Promise(resolve => {
         electron.remote.dialog.showMessageBox(
@@ -245,9 +259,12 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
         );
       });
     }
-    const settings = this.settingsService.diffOptimizedSettings(streamingSetting.bitrate);
-    if (settings) {
-      if (this.customizationService.showOptimizationDialogForNiconico) {
+    const settings = this.settingsService.diffOptimizedSettings({
+      bitrate: streamingSetting.bitrate,
+      useHardwareEncoder: this.customizationService.optimizeWithHardwareEncoder,
+    });
+    if (Object.keys(settings.delta).length > 0 || mustShowDialog) {
+      if (this.customizationService.showOptimizationDialogForNiconico || mustShowDialog) {
         this.windowsService.showWindow({
           componentName: 'OptimizeForNiconico',
           queryParams: settings,
@@ -332,10 +349,10 @@ export class StreamingService extends StatefulService<IStreamingServiceState>
 
   private formattedDurationSince(timestamp: moment.Moment) {
     const duration = moment.duration(moment().diff(timestamp));
-    const seconds = padStart(duration.seconds().toString(), 2, '0');
-    const minutes = padStart(duration.minutes().toString(), 2, '0');
+    const seconds = duration.seconds().toString().padStart(2, '0');
+    const minutes = duration.minutes().toString().padStart(2, '0');
     const dayHours = duration.days() * 24;
-    const hours = padStart((dayHours + duration.hours()).toString(), 2, '0');
+    const hours = (dayHours + duration.hours()).toString().padStart(2, '0');
 
     return `${hours}:${minutes}:${seconds}`;
   }

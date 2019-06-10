@@ -12,7 +12,7 @@ import { StreamingService } from 'services/streaming';
 import { AppService } from 'services/app';
 import { $t } from 'services/i18n';
 import { QuestionaireService } from 'services/questionaire';
-const ClipBoardCopy = require('../../media/images/clipboard-copy.svg');
+import ClipBoardCopy from '../../media/images/clipboard-copy.svg';
 
 @Component({
   components: {
@@ -65,6 +65,19 @@ export default class ExtraSettings extends Vue {
 
   setShowOptimizationDialogForNiconico(model: IFormInput<boolean>) {
     this.customizationService.setShowOptimizationDialogForNiconico(model.value);
+  }
+
+  get optimizeWithHardwareEncoderModel(): IFormInput<boolean> {
+    return {
+      name: 'optimize_with_hardware_encoder',
+      description: $t('settings.optimizeWithHardwareEncoder'),
+      value: this.customizationService.state.optimizeWithHardwareEncoder,
+      enabled: this.streamingService.isStreaming === false
+    };
+  }
+
+  setOptimizeWithHardwareEncoder(model: IFormInput<boolean>) {
+    this.customizationService.setOptimizeWithHardwareEncoder(model.value);
   }
 
   get pollingPerformanceStatisticsModel(): IFormInput<boolean> {

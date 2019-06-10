@@ -22,6 +22,19 @@ import { Observable } from 'rxjs/Observable';
 import { mergeStatic } from 'rxjs/operator/merge';
 import { WindowsService } from 'services/windows';
 import { SettingsService } from 'services/settings';
+import {
+  cpu as systemInfoCpu,
+  graphics as systemInfoGraphics,
+  osInfo as systemInfoOsInfo,
+  uuid as systemInfoUuid,
+} from 'systeminformation';
+import {
+  totalmem as nodeTotalMem,
+  freemem as nodeFreeMem,
+  cpus as nodeCpus,
+  release as nodeOsRelease,
+} from 'os';
+import { memoryUsage as nodeMemUsage } from 'process';
 
 // Eventually we will support authing multiple platforms at once
 interface IUserServiceState {
@@ -89,6 +102,7 @@ export class UserService extends PersistentStatefulService<IUserServiceState> {
       return service.isLoggedIn().then(valid => {
         if (!valid) {
           this.LOGOUT();
+          this.userLogout.next();
         }
       });
     }
@@ -261,6 +275,7 @@ export class UserService extends PersistentStatefulService<IUserServiceState> {
       if (parsed) {
         authWindow.close();
         this.LOGIN(parsed);
+        this.userLogin.next(parsed);
         this.setRavenContext();
       } else {
         // 認可されていない場合は画面を出して操作可能にする
@@ -312,10 +327,44 @@ export class UserService extends PersistentStatefulService<IUserServiceState> {
    * Registers the current user information with Raven so
    * we can view more detailed information in sentry.
    */
-  setRavenContext() {
+  async setRavenContext() {
     if (!this.isLoggedIn()) return;
     Raven.setUserContext({ username: this.username, id: this.platformId });
-    Raven.setExtraContext({ platform: this.platform.type });
+    Raven.setExtraContext(await this.getUserExtraContext());
+  }
+
+  async getUserExtraContext() {
+    try{
+      const [graphics, cpu, osInfo, osUuid] = await Promise.all([
+        systemInfoGraphics(),
+        systemInfoCpu(),
+        systemInfoOsInfo(),
+        systemInfoUuid(),
+      ]);
+
+      return {
+        platform: this.platform.type,
+        cpuModel: nodeCpus()[0].model,
+        cpuCores: `physical:${cpu.physicalCores} logical:${cpu.cores}`,
+        gpus: graphics.controllers,
+        os: `${osInfo.distro} ${osInfo.release}`,
+        osUuid: osUuid.os,
+        memTotal: nodeTotalMem(),
+        memAvailable: nodeFreeMem(),
+        memUsage: nodeMemUsage(),
+      };
+    } catch (err) {
+      return {
+        platform: this.platform.type,
+        cpuModel: nodeCpus()[0].model,
+        cpuCores: `logical:${nodeCpus().length}`,
+        os: nodeOsRelease(),
+        memTotal: nodeTotalMem(),
+        memAvailable: nodeFreeMem(),
+        memUsage: nodeMemUsage(),
+        exceptionWhenGetSystemInfo: err
+      };
+    }
   }
 
   popoutRecentEvents() {

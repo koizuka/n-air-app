@@ -13,7 +13,6 @@ jest.mock('services/i18n', () => ({
   $t: (x: any) => x,
 }));
 jest.mock('services/customization', () => ({}));
-jest.mock('services/stream-info', () => ({}));
 jest.mock('services/user', () => ({}));
 
 function noop() {}
@@ -447,7 +446,7 @@ test('toggleStreamingAsyncでstreamingStatusがoffline、ニコニコにログ�
   const { instance } = StreamingService;
 
   instance.toggleStreaming = jest.fn();
-  instance.optimizeForNiconico = jest.fn();
+  instance.optimizeForNiconicoAndStartStreaming = jest.fn();
 
   jest
     .spyOn(electron.remote.dialog, 'showMessageBox')
@@ -458,7 +457,7 @@ test('toggleStreamingAsyncでstreamingStatusがoffline、ニコニコにログ�
   await instance.toggleStreamingAsync();
 
   expect(instance.toggleStreaming).not.toHaveBeenCalled();
-  expect(instance.optimizeForNiconico).not.toHaveBeenCalled();
+  expect(instance.optimizeForNiconicoAndStartStreaming).not.toHaveBeenCalled();
 });
 
 test('toggleStreamingAsyncでstreamingStatusがoffline、ニコニコにログインしていて、番組が定まり、最適化を行う場合', async () => {
@@ -479,12 +478,12 @@ test('toggleStreamingAsyncでstreamingStatusがoffline、ニコニコにログ�
 
   const { StreamingService } = require('./streaming');
   const { instance } = StreamingService;
-  instance.optimizeForNiconico = jest.fn();
+  instance.optimizeForNiconicoAndStartStreaming = jest.fn();
   instance.toggleStreaming = jest.fn();
 
   await instance.toggleStreamingAsync();
 
-  expect(instance.optimizeForNiconico).toHaveBeenCalledTimes(1);
+  expect(instance.optimizeForNiconicoAndStartStreaming).toHaveBeenCalledTimes(1);
   expect(instance.toggleStreaming).not.toHaveBeenCalled();
 });
 
@@ -506,11 +505,11 @@ test('toggleStreamingAsyncでstreamingStatusがoffline、ニコニコにログ�
   const { StreamingService } = require('./streaming');
   const { instance } = StreamingService;
   instance.toggleStreaming = jest.fn();
-  instance.optimizeForNiconico = jest.fn();
+  instance.optimizeForNiconicoAndStartStreaming = jest.fn();
 
   await instance.toggleStreamingAsync();
 
-  expect(instance.optimizeForNiconico).not.toHaveBeenCalled();
+  expect(instance.optimizeForNiconicoAndStartStreaming).not.toHaveBeenCalled();
   expect(instance.toggleStreaming).toHaveBeenCalledTimes(1);
 });
 
@@ -538,11 +537,11 @@ test('toggleStreamingAsyncでstreamingStatusがoffline、ニコニコにログ�
   const { StreamingService } = require('./streaming');
   const { instance } = StreamingService;
   instance.toggleStreaming = jest.fn();
-  instance.optimizeForNiconico = jest.fn();
+  instance.optimizeForNiconicoAndStartStreaming = jest.fn();
 
   await instance.toggleStreamingAsync();
 
-  expect(instance.optimizeForNiconico).not.toHaveBeenCalled();
+  expect(instance.optimizeForNiconicoAndStartStreaming).not.toHaveBeenCalled();
   expect(instance.toggleStreaming).not.toHaveBeenCalled();
 });
 
@@ -573,10 +572,10 @@ test('toggleStreamingAsyncでstreamingStatusがoffline、ニコニコにログ�
   const { StreamingService } = require('./streaming');
   const { instance } = StreamingService;
   instance.toggleStreaming = jest.fn();
-  instance.optimizeForNiconico = jest.fn();
+  instance.optimizeForNiconicoAndStartStreaming = jest.fn();
 
   await instance.toggleStreamingAsync();
 
-  expect(instance.optimizeForNiconico).not.toHaveBeenCalled();
+  expect(instance.optimizeForNiconicoAndStartStreaming).not.toHaveBeenCalled();
   expect(instance.toggleStreaming).not.toHaveBeenCalled();
 });
