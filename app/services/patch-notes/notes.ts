@@ -1,9 +1,9 @@
 import { IPatchNotes } from '.';
 
 export const notes: IPatchNotes = {
-  version: '1.0.20190624-3d',
-  title: '1.0.20190624-3d',
+  version: '1.0.20190627-1d',
+  title: '1.0.20190627-1d',
   notes: [
-    '修正: リリーススクリプトのリネーム漏れに対処 (#322) by berlysia'
+    '改善: 番組情報パネルで番組URLをコピーしたときにアイコンを変えてコピーしたことをユーザーに示す (#321) by takayamaki'
   ]
 };
