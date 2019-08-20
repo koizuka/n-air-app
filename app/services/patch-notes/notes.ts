@@ -1,8 +1,8 @@
 import { IPatchNotes } from '.';
 
 export const notes: IPatchNotes = {
-  version: '1.0.20190815-1d',
-  title: '1.0.20190815-1d',
+  version: '1.0.20190820-2d',
+  title: '1.0.20190820-2d',
   notes: [
     '追加: 400エラーで番組延長失敗時のエラーメッセージを親切にする (#326) by berlysia',
     '追加: シリーズに自動リンク対応 (#325) by berlysia',
