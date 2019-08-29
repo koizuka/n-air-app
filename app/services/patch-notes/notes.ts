@@ -1,10 +1,9 @@
 import { IPatchNotes } from '.';
 
 export const notes: IPatchNotes = {
-  version: '1.0.20190822-1d',
-  title: '1.0.20190822-1d',
+  version: '1.0.20190829-2d',
+  title: '1.0.20190829-2d',
   notes: [
-    'リリーススクリプトで使うinquirerのバージョンを4から6に上げる (#331) by koizuka',
-    '更新: sl-vue-treeの参照を更新 (#332) by berlysia'
+    '改善: エラーメッセージを本当に親切にする (#337) by berlysia'
   ]
 };
