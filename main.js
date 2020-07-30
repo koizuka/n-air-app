@@ -101,6 +101,15 @@ function startApp() {
   const isDevMode = (process.env.NODE_ENV !== 'production') && (process.env.NODE_ENV !== 'test');
 
   const Raven = require('raven-js');
+  if (!Raven) {
+    console.error("require Raven failed")
+    app.quit()
+  }
+  if (!Raven.config) {
+    console.error("Raven.config is null")
+    process.crash()
+    app.quit()
+  }
 
   function handleFinishedReport() {
     dialog.showErrorBox(`予期せぬエラー`,
@@ -112,7 +121,7 @@ function startApp() {
     }
   }
 
-  if (pjson.env === 'production') {
+  if (true /* DEBUG*/ || pjson.env === 'production') {
     const params = !!process.env.NAIR_UNSTABLE
       ? {project: '5372801', key: '819e76e51864453aafd28c6d0473881f'} // crash-reporter-unstable
       : {project: '1520076', key: 'd965eea4b2254c2b9f38d2346fb8a472'}; // crash-reporter
@@ -135,6 +144,9 @@ function startApp() {
       }
     });
   }
+
+  // DEBUG
+  setTimeout(() => { process.crash(); }, 1000);
 
   const mainWindowState = windowStateKeeper({
     defaultWidth: 1600,
