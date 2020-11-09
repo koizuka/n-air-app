@@ -1,7 +1,7 @@
 import { Inject } from 'util/injector';
 import { NicoliveProgramService } from 'services/nicolive-program/nicolive-program';
 import { StatefulService, mutation } from 'services/stateful-service';
-import { Subscription, EMPTY, Observable, of } from 'rxjs';
+import { Subscription, EMPTY, Observable, of, concat } from 'rxjs';
 import {
   map,
   distinctUntilChanged,
@@ -129,7 +129,17 @@ export class NicoliveCommentViewerService extends StatefulService<INicoliveComme
   }
 
   private connect() {
-    this.lastSubscription = this.client.connect()
+    // this.lastSubscription = this.client.connect()
+    this.lastSubscription = concat( // DEBUG: emotion用テストデータをダミー挿入
+      of({
+        chat: {
+          date: Math.floor(Date.now() / 1000),
+          premium: 0b10,
+          content: '/emotion ん?x28、尊いx27、wwwx26、8888x25、求むx24',
+        }
+      }),
+      this.client.connect()
+    )
       .pipe(
         groupBy(msg => Object.keys(msg)[0]),
         mergeMap((group$): Observable<Pick<WrappedChat, 'type' | 'value'>> => {
