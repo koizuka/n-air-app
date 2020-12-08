@@ -1,5 +1,5 @@
 import { StatefulService, mutation } from 'services/stateful-service';
-import { NicoliveClient, CreateResult, EditResult, isOk } from './NicoliveClient';
+import { NicoliveClient, CreateResult, EditResult, isOk, FailedResult } from './NicoliveClient';
 import { ProgramSchedules } from './ResponseTypes';
 import { Inject } from 'util/injector';
 import { NicoliveProgramStateService } from './state';
@@ -299,6 +299,18 @@ export class NicoliveProgramService extends StatefulService<INicoliveProgramStat
   }
 
   private async internalExtendProgram(state: INicoliveProgramState): Promise<void> {
+    // DEBUG: throw error
+    const result: FailedResult = {
+      ok: false,
+      value: {
+        meta: {
+          status: 500
+        }
+      }
+    };
+    throw NicoliveFailure.fromClientError('extendProgram', result);
+
+    /*
     const result = await this.client.extendProgram(state.programID);
     if (!isOk(result)) {
       throw NicoliveFailure.fromClientError('extendProgram', result);
@@ -306,6 +318,7 @@ export class NicoliveProgramService extends StatefulService<INicoliveProgramStat
 
     const endTime = result.value.end_time;
     this.setState({ endTime });
+    */
   }
 
   private statsTimer: number = 0;
