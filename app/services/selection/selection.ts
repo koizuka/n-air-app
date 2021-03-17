@@ -1,6 +1,6 @@
 import { uniq } from 'lodash';
 import electron from 'electron';
-import { mutation, StatefulService, ServiceHelper } from 'services/core/stateful-service';
+import { mutation, StatefulService, ServiceHelper } from 'services/core';
 import {
   Scene,
   SceneItem,

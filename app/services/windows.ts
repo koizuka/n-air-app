@@ -141,7 +141,7 @@ export class WindowsService extends StatefulService<IWindowsState> {
   private updateScaleFactor(windowId: string) {
     const window = this.windows[windowId];
     const bounds = window.getBounds();
-    const currentDisplay = electron.screen.getDisplayMatching(bounds);
+    const currentDisplay = electron.remote.screen.getDisplayMatching(bounds);
     this.UPDATE_SCALE_FACTOR(windowId, currentDisplay.scaleFactor);
   }
 
@@ -201,7 +201,7 @@ export class WindowsService extends StatefulService<IWindowsState> {
       return windowId;
     }
 
-    this.CREATE_ONE_OFF_WINDOW(windowId, options);
+    this.CREATE_ONE_OFF_WINDOW(windowId, { ...DEFAULT_WINDOW_OPTIONS, ...options});
 
     const newWindow = this.windows[windowId] = new BrowserWindow({
       frame: false,
@@ -209,6 +209,7 @@ export class WindowsService extends StatefulService<IWindowsState> {
       transparent: options.transparent,
       resizable: options.resizable,
       alwaysOnTop: options.alwaysOnTop,
+      webPreferences: { nodeIntegration: true, webviewTag: true },
     });
 
     newWindow.setMenu(null);
@@ -251,19 +252,22 @@ export class WindowsService extends StatefulService<IWindowsState> {
    * Closes all one-off windows
    */
   closeAllOneOffs() {
+    const closingPromises: Promise<void>[] = [];
     Object.keys(this.windows).forEach(windowId => {
       if (windowId === 'main') return;
       if (windowId === 'child') return;
       this.closeOneOffWindow(windowId);
+      closingPromises.push(this.closeOneOffWindow(windowId));
     });
+    return Promise.all(closingPromises);
   }
 
-  closeOneOffWindow(windowId: string) {
-    if (this.windows[windowId]) {
-      if (!this.windows[windowId].isDestroyed()) {
-        this.windows[windowId].destroy();
-      }
-    }
+  closeOneOffWindow(windowId: string): Promise<void> {
+    if (!this.windows[windowId] || this.windows[windowId].isDestroyed()) return Promise.resolve();
+    return new Promise(resolve => {
+      this.windows[windowId].on('closed', resolve);
+      this.windows[windowId].destroy();
+    });
   }
 
 

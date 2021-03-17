@@ -1,11 +1,8 @@
 import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
-import electron from 'electron';
 import { Inject } from 'services/core/injector';
 import { VideoService, Display as OBSDisplay } from 'services/video';
 import { WindowsService } from 'services/windows';
-
-const { remote } = electron;
 
 @Component({})
 export default class Display extends Vue {
@@ -31,11 +28,16 @@ export default class Display extends Vue {
     this.$emit('click', event);
   }
 
+  // get paddingColor() {
+  //   return this.customizationService.displayBackground;
+  // }
+
   createDisplay() {
     const displayId = this.videoService.getRandomDisplayId();
     this.display = new OBSDisplay(displayId, {
       sourceId: this.sourceId,
-      paddingSize: this.paddingSize
+      paddingSize: this.paddingSize,
+      // paddingColor: this.paddingColor,
     });
     this.display.setShoulddrawUI(this.drawUI);
 
@@ -52,6 +54,11 @@ export default class Display extends Vue {
 
   @Watch('sourceId')
   changeSource() {
+    this.updateDisplay();
+  }
+
+  @Watch('paddingColor')
+  updateDisplay() {
     this.destroyDisplay();
     this.createDisplay();
   }

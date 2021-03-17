@@ -578,7 +578,7 @@ export class SceneCollectionsService extends Service
       this.transitionsService.deleteAllTransitions();
       this.transitionsService.deleteAllConnections();
     } catch (e) {
-      console.error('Error deloading application state');
+      console.error('Error deloading application state', e);
     }
 
     this.hotkeysService.clearAllHotkeys();

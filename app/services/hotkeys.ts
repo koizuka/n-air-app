@@ -3,8 +3,7 @@ import { ScenesService } from 'services/scenes';
 import { SourcesService } from 'services/sources';
 import { TransitionsService } from 'services/transitions';
 import { KeyListenerService } from 'services/key-listener';
-import { Inject } from 'services/core/injector';
-import { StatefulService, mutation, ServiceHelper } from 'services/core/stateful-service';
+import { StatefulService, mutation, ServiceHelper, Inject } from './core';
 import { defer } from 'lodash';
 import { $t } from 'services/i18n';
 
@@ -115,7 +114,12 @@ const HOTKEY_ACTIONS: Dictionary<IHotkeyAction[]> = {
       name: 'TRANSITION_STUDIO_MODE',
       description: () => $t('hotkeys.studioModeTransition'),
       down: () => getTransitionsService().executeStudioModeTransition()
-    }
+    },
+    {
+      name: 'SAVE_REPLAY',
+      description: () => $t('hotkeys.saveReplay'),
+      down: () => getStreamingService().saveReplay(),
+    },
   ],
 
   SCENE: [
