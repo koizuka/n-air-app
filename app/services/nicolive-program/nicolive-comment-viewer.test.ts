@@ -14,7 +14,7 @@ jest.mock('services/nicolive-program/nicolive-program', () => ({ NicoliveProgram
 jest.mock('services/nicolive-program/nicolive-comment-filter', () => ({ NicoliveCommentFilterService: {} }));
 
 beforeEach(() => {
-  jest.doMock('services/stateful-service');
+  jest.doMock('services/core/stateful-service');
   jest.doMock('services/core/injector');
 });
 
