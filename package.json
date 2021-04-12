@@ -124,7 +124,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/plugin-syntax-import-meta": "^7.2.0",
     "@babel/preset-env": "^7.4.5",
-    "@jest-runner/electron": "^1.1.1",
+    "@jest-runner/electron": "^v3.0.0",
     "@types/archiver": "^3.0.0",
     "@types/base64-js": "^1.2.5",
     "@types/fetch-mock": "^7.2.3",
