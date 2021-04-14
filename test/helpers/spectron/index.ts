@@ -1,9 +1,19 @@
 /// <reference path="../../../app/index.d.ts" />
-import test from 'ava';
+import avaTest, { ExecutionContext, TestInterface } from 'ava';
 import { Application } from 'spectron';
 import { getClient } from '../api-client';
 import { DismissablesService } from 'services/dismissables';
 import { sleep } from '../sleep';
+
+// save names of all running tests to use them in the retrying mechanism
+const pendingTests: string[] = [];
+export const test: TestInterface<ITestContext> = new Proxy(avaTest, {
+  apply: (target, thisArg, args) => {
+    const testName = args[0];
+    pendingTests.push(testName);
+    return target.apply(thisArg, args);
+  },
+});
 
 const path = require('path');
 const fs = require('fs');
@@ -32,6 +42,10 @@ export async function focusChild(t: any) {
   await focusWindow(t, /windowId=child/);
 }
 
+export async function waitForLoader(t: any) {
+  await t.context.app.client.waitForExist('.main-loading', 10000, true);
+}
+
 interface ITestRunnerOptions {
   skipOnboarding?: boolean;
   restartAppAfterEachTest?: boolean;
@@ -48,17 +62,28 @@ interface ITestRunnerOptions {
 
 const DEFAULT_OPTIONS: ITestRunnerOptions = {
   skipOnboarding: true,
-  restartAppAfterEachTest: true
+  restartAppAfterEachTest: true,
 };
+
+export interface ITestContext {
+  cacheDir: string;
+  app: Application;
+}
+
+export type TExecutionContext = ExecutionContext<ITestContext>;
 
 export function useSpectron(options: ITestRunnerOptions = {}) {
   options = Object.assign({}, DEFAULT_OPTIONS, options);
   let appIsRunning = false;
   let context: any = null;
-  let app: any;
+  let app: Application;
+  let testPassed = false;
+  let failMsg = '';
+  const cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'n-air-test'));
 
-  async function startApp(t: any) {
-    t.context.cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'n-air-test'));
+  async function startApp(t: TExecutionContext): Promise<Application> {
+    t.log('startApp 1'); // DEBUG
+    t.context.cacheDir = cacheDir;
     app = t.context.app = new Application({
       path: path.join(__dirname, '..', '..', '..', '..', 'node_modules', '.bin', 'electron.cmd'),
       args: [
@@ -66,17 +91,35 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
         path.join(__dirname, 'context-menu-injected.js'),
         '--require',
         path.join(__dirname, 'dialog-injected.js'),
-        '.'
+        '.',
       ],
       env: {
         NODE_ENV: 'test',
-        NAIR_CACHE_DIR: t.context.cacheDir
-      }
+        NAIR_CACHE_DIR: t.context.cacheDir,
+      },
+      webdriverOptions: {
+        // most of deprecation warning encourage us to use WebdriverIO actions API
+        // however the documentation for this API looks very poor, it provides only one example:
+        // http://webdriver.io/api/protocol/actions.html
+        // disable deprecation warning and waiting for better docs now
+        deprecationWarnings: false,
+      },
     });
 
     if (options.beforeAppStartCb) await options.beforeAppStartCb(t);
 
+    // DEBUG これが戻ってこない模様
     await t.context.app.start();
+
+    // Disable CSS transitions while running tests to allow for eager test clicks
+    const disableTransitionsCode = `
+      const disableAnimationsEl = document.createElement('style');
+      disableAnimationsEl.textContent =
+        '*{ transition: none !important; transition-property: none !important; animation: none !important }';
+      document.head.appendChild(disableAnimationsEl);
+    `;
+    await focusMain(t);
+    await t.context.app.webContents.executeJavaScript(disableTransitionsCode);
 
     // Wait up to 2 seconds before giving up looking for an element.
     // This will slightly slow down negative assertions, but makes
@@ -84,11 +127,12 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
     t.context.app.client.timeouts('implicit', 2000);
 
     // await sleep(100000);
-    await focusMain(t);
 
     // Pretty much all tests except for onboarding-specific
     // tests will want to skip this flow, so we do it automatically.
+    //await waitForLoader(t);
     if (options.skipOnboarding) {
+      await t.context.app.client.waitForExist('.onboarding-step', 10000);
       await t.context.app.client.click('[data-test="Skip"]');
 
       // This will only show up if OBS is installed
@@ -99,11 +143,18 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
       // Wait for the connect screen before moving on
       await t.context.app.client.isExisting('[data-test="NiconicoSignup"]');
     }
+    t.log('startApp 7'); // DEBUG
 
     // disable the popups that prevents context menu to be shown
     const client = await getClient();
+    t.log('startApp 8'); // DEBUG
     const dismissablesService = client.getResource<DismissablesService>('DismissablesService');
     dismissablesService.dismissAll();
+
+    // disable animations in the child window
+    await focusChild(t);
+    await t.context.app.webContents.executeJavaScript(disableTransitionsCode);
+    await focusMain(t);
 
     context = t.context;
     appIsRunning = true;
@@ -111,34 +162,69 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
     if (options.afterStartCb) {
       await options.afterStartCb(t);
     }
+    t.log('startApp end'); // DEBUG
+
+    return app;
   }
 
   async function stopApp() {
-    await context.app.stop();
-    await new Promise((resolve) => {
+    try {
+      await app.stop();
+    } catch (e) {
+      fail('Crash on shutdown');
+      console.error(e);
+    }
+    appIsRunning = false;
+
+    await new Promise(resolve => {
       rimraf(context.cacheDir, resolve);
     });
-    appIsRunning = false;
   }
 
   test.beforeEach(async t => {
+    t.log('beforeEach 1'); // DEBUG
+    testPassed = false;
+
     t.context.app = app;
     if (options.restartAppAfterEachTest || !appIsRunning) await startApp(t);
+    t.log('beforeEach end'); // DEBUG
+  });
+
+  test.afterEach(async t => {
+    testPassed = true;
   });
 
   test.afterEach.always(async t => {
-    const client = await getClient();
-    await client.unsubscribeAll();
-    if (options.restartAppAfterEachTest) {
-      client.disconnect();
+    // wrap in try/catch for the situation when we have a crash
+    // so we still can read the logs after the crash
+    try {
+      const client = await getClient();
+      await client.unsubscribeAll();
+      if (options.restartAppAfterEachTest) {
+        client.disconnect();
+        await stopApp();
+      }
+    } catch (e) {
+      fail('Test finalization failed');
+      console.error(e);
     }
 
-    if (options.restartAppAfterEachTest) {
-      await stopApp();
+    if (!testPassed) {
+      fail();
+      t.fail(failMsg);
     }
   });
 
   test.after.always(async t => {
-    if (appIsRunning) await stopApp();
+    if (!appIsRunning) return;
+    await stopApp();
   });
+
+  /**
+   * mark tests as failed
+   */
+  function fail(msg?: string) {
+    testPassed = false;
+    if (msg) failMsg = msg;
+  }
 }

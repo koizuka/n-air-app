@@ -53,7 +53,7 @@ export class TcpServerService extends PersistentStatefulService<ITcpServersSetti
     token: '',
     namedPipe: {
       enabled: true,
-      pipeName: 'n-air',
+      pipeName: 'n-air-app',
     },
     websockets: {
       enabled: false,
