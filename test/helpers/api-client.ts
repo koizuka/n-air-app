@@ -41,7 +41,7 @@ export class ApiClient {
   // set to 'true' for debugging
   logsEnabled = false;
 
-  connect() {
+  connect(): Promise<void> {
     if (this.socket) this.socket.destroy();
 
     this.socket = new net.Socket();
@@ -67,7 +67,7 @@ export class ApiClient {
     this.socket.on('error', (error: any) => {
       this.log('error', error);
       this.connectionStatus = 'disconnected';
-      this.rejectConnection();
+      this.rejectConnection(error);
     });
 
     this.socket.on('data', (data: any) => {
@@ -278,7 +278,7 @@ export class ApiClient {
 
         const resourceScheme = this.getResourceScheme(resourceId);
 
-        if (resourceScheme[property as string] !== 'function') {
+        if (resourceScheme[property] !== 'function') {
           return handleRequest(resourceId, property as string);
         }
 
