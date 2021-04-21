@@ -89,7 +89,7 @@ const validationMessages = {
       required: () => $t('common.fieldIsRequired'),
       min_value: (fieldName: string, params: number[]) => $t('common.fieldMustBeLarger', {value: params[0]}),
       max_value: (fieldName: string, params: number[]) => $t('common.fieldMustBeLess', {value: params[0]}),
-      date_format: (fieldName: string, params: number[]) => $('common.dateFieldFormat', {format: params[0]}),
+      date_format: (fieldName: string, params: number[]) => $t('common.dateFieldFormat', {format: params[0]}),
       alpha_num: () => $t('common.fieldAlphaNumeric'),
     }
   }
