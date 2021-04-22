@@ -13,7 +13,7 @@ import {
 } from 'services/api/jsonrpc/index';
 import { IIPAddressDescription, ITcpServerServiceApi, ITcpServersSettings } from './tcp-server-api';
 import { UsageStatisticsService } from 'services/usage-statistics';
-// いったん殺す import { ExternalApiService } from '../external-api';
+import { ExternalApiService } from '../external-api';
 import { SceneCollectionsService } from 'services/scene-collections';
 
 const net = require('net');
@@ -64,7 +64,7 @@ export class TcpServerService extends PersistentStatefulService<ITcpServersSetti
 
   @Inject() private jsonrpcService: JsonrpcService;
   @Inject() private usageStatisticsService: UsageStatisticsService;
-  // いったん殺す @Inject() private externalApiService: ExternalApiService;
+  @Inject() private externalApiService: ExternalApiService;
   private clients: Dictionary<IClient> = {};
   private nextClientId = 1;
   private servers: IServer[] = [];
@@ -75,7 +75,7 @@ export class TcpServerService extends PersistentStatefulService<ITcpServersSetti
 
   init() {
     super.init();
-    // いったん殺す this.externalApiService.serviceEvent.subscribe(event => this.onServiceEventHandler(event));
+    this.externalApiService.serviceEvent.subscribe(event => this.onServiceEventHandler(event));
   }
 
   listen() {
@@ -361,7 +361,6 @@ export class TcpServerService extends PersistentStatefulService<ITcpServersSetti
         // some requests have to be handled by TcpServerService
         if (this.hadleTcpServerDirectives(client, request)) return;
 
-        /* いったん殺す
         const response = this.externalApiService.executeServiceRequest(request);
 
         // if response is subscription then add this subscription to client
@@ -373,7 +372,6 @@ export class TcpServerService extends PersistentStatefulService<ITcpServersSetti
         }
 
         this.sendResponse(client, response);
-        */
       } catch (e) {
         this.sendResponse(
           client,
@@ -456,8 +454,8 @@ export class TcpServerService extends PersistentStatefulService<ITcpServersSetti
 
     // handle unsubscribing by clearing client subscriptions
     if (
-      request.method === 'unsubscribe' // &&
-      // いったん殺す this.externalApiService.subscriptions[request.params.resource]
+      request.method === 'unsubscribe' &&
+      this.externalApiService.subscriptions[request.params.resource]
     ) {
       const subscriptionInd = client.subscriptions.indexOf(request.params.resource);
       if (subscriptionInd !== -1) client.subscriptions.splice(subscriptionInd, 1);

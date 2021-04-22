@@ -82,7 +82,6 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
   const cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'n-air-test'));
 
   async function startApp(t: TExecutionContext): Promise<Application> {
-    t.log('startApp 1'); // DEBUG
     t.context.cacheDir = cacheDir;
     app = t.context.app = new Application({
       path: path.join(__dirname, '..', '..', '..', '..', 'node_modules', '.bin', 'electron.cmd'),
@@ -108,7 +107,6 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
 
     if (options.beforeAppStartCb) await options.beforeAppStartCb(t);
 
-    // DEBUG これが戻ってこない模様
     await t.context.app.start();
 
     // Disable CSS transitions while running tests to allow for eager test clicks
@@ -143,11 +141,9 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
       // Wait for the connect screen before moving on
       await t.context.app.client.isExisting('[data-test="NiconicoSignup"]');
     }
-    t.log('startApp 7'); // DEBUG
 
     // disable the popups that prevents context menu to be shown
     const client = await getClient();
-    t.log('startApp 8'); // DEBUG
     const dismissablesService = client.getResource<DismissablesService>('DismissablesService');
     dismissablesService.dismissAll();
 
@@ -162,7 +158,6 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
     if (options.afterStartCb) {
       await options.afterStartCb(t);
     }
-    t.log('startApp end'); // DEBUG
 
     return app;
   }
@@ -182,12 +177,10 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
   }
 
   test.beforeEach(async t => {
-    t.log('beforeEach 1'); // DEBUG
     testPassed = false;
 
     t.context.app = app;
     if (options.restartAppAfterEachTest || !appIsRunning) await startApp(t);
-    t.log('beforeEach end'); // DEBUG
   });
 
   test.afterEach(async t => {

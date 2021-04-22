@@ -5,7 +5,7 @@
 // OFFLINE SERVICES
 export { AppService } from 'services/app';
 export { InternalApiService } from 'services/api/internal-api';
-// export { ExternalApiService } from 'services/api/external-api';
+export { ExternalApiService } from 'services/api/external-api';
 export { SourcesService, Source } from 'services/sources';
 export { Scene, SceneItem, SceneItemFolder, SceneItemNode, ScenesService } from 'services/scenes';
 export { ObsImporterService } from 'services/obs-importer';
