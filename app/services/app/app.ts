@@ -1,5 +1,5 @@
 import uuid from 'uuid/v4';
-import { StatefulService, mutation } from 'services/core/stateful-service';
+import { mutation, StatefulService } from 'services/core/stateful-service';
 import { OnboardingService } from 'services/onboarding';
 import { HotkeysService } from 'services/hotkeys';
 import { UserService } from 'services/user';
@@ -129,13 +129,11 @@ export class AppService extends StatefulService<IAppState> {
     // Second, we want to start the crash reporter service.  We do this
     // after the user service because we want crashes to be associated
     // with a particular user if possible.
-    this.crashReporterService.beginStartup()
+    this.crashReporterService.beginStartup();
 
     // Initialize any apps before loading the scene collection.  This allows
     // the apps to already be in place when their sources are created.
     // await this.platformAppsService.initialize();
-
-    // --------------------------- old
 
     await this.sceneCollectionsService.initialize();
     const questionaireStarted = await this.questionaireService.startIfRequired()
@@ -147,7 +145,10 @@ export class AppService extends StatefulService<IAppState> {
       this.shutdownHandler();
     });
 
-    this.shortcutsService;
+    // Eager load services
+    const _ = [
+      this.shortcutsService,
+    ];
 
     this.performanceMonitorService.start();
 
@@ -288,6 +289,7 @@ export class AppService extends StatefulService<IAppState> {
   private SET_ERROR_ALERT(errorAlert: boolean) {
     this.state.errorAlert = errorAlert;
   }
+
   @mutation()
   private SET_ARGV(argv: string[]) {
     this.state.argv = argv;
