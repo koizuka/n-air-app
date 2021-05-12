@@ -14,7 +14,11 @@ export default class Hotkeys extends Vue {
   @Inject() private scenesService: ScenesService;
   @Inject() private hotkeysService: HotkeysService;
 
-  hotkeySet: IHotkeysSet = null;
+  hotkeySet: IHotkeysSet = {
+    general: [],
+    sources: {},
+    scenes: {},
+  };
 
   mounted() {
     // We don't want hotkeys registering while trying to bind.
