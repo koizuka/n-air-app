@@ -261,8 +261,8 @@ if (!gotTheLock) {
 
     // Pre-initialize the child window
     childWindow = new BrowserWindow({
-      //parent: mainWindow,
-      //minimizable: false,
+      parent: mainWindow,
+      minimizable: false,
       show: false,
       frame: false,
       backgroundColor: '#17242D', // これいる?
