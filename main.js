@@ -35,6 +35,12 @@ const path = require('path');
 const rimraf = require('rimraf');
 const electronLog = require('electron-log');
 
+function log(...args) {
+  if (!process.env.NAIR_DISABLE_MAIN_LOGGING) {
+    electronLog.log(...args);
+  }
+}
+
 // We use a special cache directory for running tests
 if (process.env.NAIR_CACHE_DIR) {
   app.setPath('appData', process.env.NAIR_CACHE_DIR);
@@ -119,12 +125,6 @@ if (!gotTheLock) {
       });
     });
   })();
-
-  function log(...args) {
-    if (!process.env.NAIR_DISABLE_MAIN_LOGGING) {
-      electronLog.log(...args);
-    }
-  }
 
   // Windows
   let mainWindow;
