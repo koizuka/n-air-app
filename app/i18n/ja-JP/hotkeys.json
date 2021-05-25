@@ -13,5 +13,5 @@
   "enableStudioMode": "スタジオモードを有効にする",
   "disableStudioMode": "スタジオモードを無効にする",
   "studioModeTransition": "プレビュー画面の内容をライブ画面に反映する（スタジオモード時）",
-  "saveReplay": "リプレイを保存する(仮翻訳)"
+  "saveReplay": "リプレイを保存する"
 }
