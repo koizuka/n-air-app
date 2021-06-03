@@ -222,7 +222,7 @@ export class SourcesNode extends Node<ISchema, {}> {
         name: source.id,
         type: source.type,
         muted: source.muted || false,
-        settings: source.settings, // applyPathConvertForPreset(source.type, source.settings),
+        settings: applyPathConvertForPreset(source.type, source.settings),
         volume: source.volume,
         filters: source.filters.items.map(filter => {
           return {
@@ -235,7 +235,7 @@ export class SourcesNode extends Node<ISchema, {}> {
         syncOffset: {sec: 0, nsec: 0}, // streamlabs v0.16.3 にはないが無いとコンパイルエラーが出る
       };
     });
-    
+
     // This ensures we have bound the source size callback
     // before creating any sources in OBS.
     this.sourcesService;
