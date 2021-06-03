@@ -41,10 +41,9 @@ interface IObsSourceCallbackInfo {
 }
 
 export class SourcesService extends StatefulService<ISourcesState> implements ISourcesServiceApi {
-
   static initialState = {
     sources: {},
-    temporarySources: {} // don't save temporarySources in the config file
+    temporarySources: {}, // don't save temporarySources in the config file
   } as ISourcesState;
 
   sourceAdded = new Subject<ISource>();
@@ -60,14 +59,13 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
    */
   propertiesManagers: Dictionary<IActivePropertyManager> = {};
 
-
   protected init() {
     obs.NodeObs.RegisterSourceCallback((objs: IObsSourceCallbackInfo[]) =>
       this.handleSourceCallback(objs),
     );
 
-    this.scenesService.itemRemoved.subscribe( sceneSourceModel =>
-      this.onSceneItemRemovedHandler(sceneSourceModel)
+    this.scenesService.itemRemoved.subscribe(sceneSourceModel =>
+      this.onSceneItemRemovedHandler(sceneSourceModel),
     );
 
     this.scenesService.sceneRemoved.subscribe(sceneModel => this.removeSource(sceneModel.id));
@@ -92,7 +90,7 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
       sourceId: id,
       name: addOptions.name,
       type: addOptions.type,
-      propertiesManagerType: addOptions.propertiesManagerType,
+      propertiesManagerType: addOptions.propertiesManagerType || 'default',
 
       // Whether the source has audio and/or video
       // Will be updated periodically
@@ -129,12 +127,11 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
     Object.assign(this.state.sources[sourcePatch.id], sourcePatch);
   }
 
-
   createSource(
     name: string,
     type: TSourceType,
     settings: Dictionary<any> = {},
-    options: ISourceAddOptions = {}
+    options: ISourceAddOptions = {},
   ): Source {
 
     const id: string = options.sourceId || `${type}_${uuid()}`;
@@ -157,7 +154,7 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
       id,
       name,
       type,
-      channel: options.channel, 
+      channel: options.channel,
       isTemporary: options.isTemporary,
       propertiesManagerType: managerType,
     });
@@ -168,7 +165,7 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
 
     const managerKlass = PROPERTIES_MANAGER_TYPES[managerType];
     this.propertiesManagers[id] = {
-      manager: new managerKlass(obsInput, options.propertiesManagerSettings),
+      manager: new managerKlass(obsInput, options.propertiesManagerSettings || {}),
       type: managerType,
     };
 
@@ -202,7 +199,7 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
       image_source: ['png', 'jpg', 'jpeg', 'tga', 'bmp'],
       ffmpeg_source: ['mp4', 'ts', 'mov', 'flv', 'mkv', 'avi', 'mp3', 'ogg', 'aac', 'wav', 'gif', 'webm'],
       browser_source: ['html'],
-      text_gdiplus: ['txt']
+      text_gdiplus: ['txt'],
     };
     let ext = path.split('.').splice(-1)[0];
     if (!ext) return null;
@@ -218,13 +215,13 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
       } else if (type === 'browser_source') {
         settings = {
           is_local_file: true,
-          local_file: path
+          local_file: path,
         };
       } else if (type === 'ffmpeg_source') {
         settings = {
           is_local_file: true,
           local_file: path,
-          looping: true
+          looping: true,
         };
       } else if (type === 'text_gdiplus') {
         settings = { text: fs.readFileSync(path).toString() };
@@ -284,7 +281,6 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
     if (type === 'text_gdiplus') {
       if (resolvedSettings.text === void 0) resolvedSettings.text = name;
     }
-
     return resolvedSettings;
   }
 
@@ -347,8 +343,9 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
         source.height !== sourcesSize[index].height
       ) {
         const size = {
-          id: item.sourceId, width: sourcesSize[index].width,
-          height: sourcesSize[index].height
+          id: item.sourceId,
+          width: sourcesSize[index].width,
+          height: sourcesSize[index].height,
         };
         this.UPDATE_SOURCE(size);
       }
@@ -384,14 +381,12 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
     }
   }
 
-
   setMuted(id: string, muted: boolean) {
     const source = this.getSource(id);
     source.getObsInput().muted = muted;
     this.UPDATE_SOURCE({ id, muted });
     this.sourceUpdated.next(source.state);
   }
-
 
   reset() {
     this.RESET_SOURCES();
@@ -403,7 +398,6 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
     return this.getSource(id);
   }
 
-
   getSourcesByName(name: string): Source[] {
     const sourceModels = Object.values(this.state.sources).filter(source => {
       return source.name === name;
@@ -411,21 +405,19 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
     return sourceModels.map(sourceModel => this.getSource(sourceModel.sourceId));
   }
 
-
   get sources(): Source[] {
-    return Object.values(this.state.sources).map(sourceModel => this.getSource(sourceModel.sourceId));
+    return Object.values(this.state.sources).map(sourceModel =>
+      this.getSource(sourceModel.sourceId),
+    );
   }
-
 
   getSource(id: string): Source {
     return this.state.sources[id] || this.state.temporarySources[id] ? new Source(id) : void 0;
   }
 
-
   getSources() {
     return this.sources;
   }
-
 
   showSourceProperties(sourceId: string) {
     const source = this.getSource(sourceId);
@@ -436,8 +428,8 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
       queryParams: { sourceId },
       size: {
         width: 600,
-        height: 600
-      }
+        height: 600,
+      },
     });
   }
 
@@ -447,8 +439,8 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
       title: $t('sources.addSourceTitle'),
       size: {
         width: 680,
-        height: 600
-      }
+        height: 600,
+      },
     });
   }
 
@@ -459,8 +451,8 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
       queryParams: { sourceType, sourceAddOptions },
       size: {
         width: 640,
-        height: 600
-      }
+        height: 600,
+      },
     });
   }
 
@@ -471,8 +463,8 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
       queryParams: { sourceId },
       size: {
         width: 400,
-        height: 250
-      }
+        height: 250,
+      },
     });
   }
 }
