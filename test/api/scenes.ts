@@ -1,6 +1,6 @@
 import { useSpectron, test } from '../helpers/spectron';
 import { getClient } from '../helpers/api-client';
-import { IScenesServiceApi } from '../../app/services/scenes/scenes-api';
+import { ScenesService } from '../../app/services/scenes';
 import { sleep } from '../helpers/sleep';
 import { SceneBuilder } from '../helpers/scene-builder';
 import { DefaultSceneName } from '../helpers/spectron/scenes';
@@ -11,7 +11,7 @@ useSpectron({ restartAppAfterEachTest: false });
 
 test('The default scene exists', async t => {
   const client = await getClient();
-  const scenesService = client.getResource<IScenesServiceApi>('ScenesService');
+  const scenesService = client.getResource<ScenesService>('ScenesService');
   const scenes = scenesService.getScenes();
 
   t.true(scenes.length === 1);
@@ -21,7 +21,7 @@ test('The default scene exists', async t => {
 
 test('Creating, fetching and removing scenes', async t => {
   const client = await getClient();
-  const scenesService = client.getResource<IScenesServiceApi>('ScenesService');
+  const scenesService = client.getResource<ScenesService>('ScenesService');
   t.is(scenesService.getScenes().length, 1);
   const scene1name = scenesService.getScenes()[0].name;
 
@@ -44,7 +44,7 @@ test('Creating, fetching and removing scenes', async t => {
 
 test('Switching between scenes', async t => {
   const client = await getClient();
-  const scenesService = client.getResource<IScenesServiceApi>('ScenesService');
+  const scenesService = client.getResource<ScenesService>('ScenesService');
   t.is(scenesService.getScenes().length, 1);
   const scene1name = scenesService.getScenes()[0].name;
 
@@ -67,7 +67,7 @@ test('Switching between scenes', async t => {
 
 test('Creating, fetching and removing scene-items', async t => {
   const client = await getClient();
-  const scenesService = client.getResource<IScenesServiceApi>('ScenesService');
+  const scenesService = client.getResource<ScenesService>('ScenesService');
 
   const scene = scenesService.getSceneByName(DefaultSceneName);
   const presetItemIds = scene.getItems().map(item => item.id);
@@ -90,7 +90,7 @@ test('Creating, fetching and removing scene-items', async t => {
 
 test('Scenes events', async t => {
   const client = await getClient();
-  const scenesService = client.getResource<IScenesServiceApi>('ScenesService');
+  const scenesService = client.getResource<ScenesService>('ScenesService');
   let eventData: Dictionary<any>;
 
   scenesService.sceneSwitched.subscribe(() => void 0);
@@ -136,7 +136,7 @@ test('Scenes events', async t => {
 
 test('Creating nested scenes', async t => {
   const client = await getClient();
-  const scenesService = client.getResource<IScenesServiceApi>('ScenesService');
+  const scenesService = client.getResource<ScenesService>('ScenesService');
 
   const sceneA = scenesService.createScene('SceneA');
   const sceneB = scenesService.createScene('SceneB');
@@ -166,7 +166,7 @@ test('Creating nested scenes', async t => {
 
 test('SceneItem.setSettings()', async t => {
   const client = await getClient();
-  const scenesService = client.getResource<IScenesServiceApi>('ScenesService');
+  const scenesService = client.getResource<ScenesService>('ScenesService');
   const scene = scenesService.activeScene;
 
   const sceneItem = scene.createAndAddSource('MyColorSource', 'color_source');
@@ -202,7 +202,7 @@ test('SceneItem.setSettings()', async t => {
 
 test('SceneItem.resetTransform()', async t => {
   const client = await getClient();
-  const scenesService = client.getResource<IScenesServiceApi>('ScenesService');
+  const scenesService = client.getResource<ScenesService>('ScenesService');
   const scene = scenesService.activeScene;
 
   const sceneItem = scene.createAndAddSource('MyColorSource', 'color_source');
@@ -231,7 +231,7 @@ test('SceneItem.addFile()', async t => {
 
   const client = await getClient();
   const sceneBuilder = new SceneBuilder(client);
-  const scenesService = client.getResource<IScenesServiceApi>('ScenesService');
+  const scenesService = client.getResource<ScenesService>('ScenesService');
   const scene = scenesService.activeScene;
 
   scene.clear();
