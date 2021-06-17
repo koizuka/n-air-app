@@ -136,7 +136,7 @@ export class SceneCollectionsService extends Service
   /// install preset scene collection into active scene collection
   async installPresetSceneCollection() {
     // 既存scene を消す
-    this.scenesService.scenes.forEach(scene => scene.remove(true));
+    this.scenesService.removeAllScenes();
 
     // キャンバス解像度を 1280x720 に変更する
     const CanvasResolution = '1280x720';

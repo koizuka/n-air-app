@@ -177,6 +177,9 @@ export class ScenesService extends StatefulService<IScenesState> {
     }
 
     const scene = this.getScene(id);
+    if (!scene) {
+      return null;
+    }
     const sceneModel = this.state.scenes[id];
 
     // remove all sources from scene
@@ -200,6 +203,10 @@ export class ScenesService extends StatefulService<IScenesState> {
 
     this.sceneRemoved.next(sceneModel);
     return sceneModel;
+  }
+
+  removeAllScenes() {
+    this.scenes.forEach(scene => scene.remove(true));
   }
 
 
