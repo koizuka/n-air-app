@@ -20,6 +20,11 @@ const fs = require('fs');
 const os = require('os');
 const rimraf = require('rimraf');
 
+const afterStartCallbacks: ((t: TExecutionContext) => any)[] = [];
+export function afterAppStart(cb: (t: TExecutionContext) => any) {
+  afterStartCallbacks.push(cb);
+}
+
 async function focusWindow(t: any, regex: RegExp) {
   const handles = await t.context.app.client.windowHandles();
 
@@ -49,7 +54,6 @@ export async function waitForLoader(t: any) {
 interface ITestRunnerOptions {
   skipOnboarding?: boolean;
   restartAppAfterEachTest?: boolean;
-  afterStartCb?(t: any): Promise<any>;
 
   /**
    * Called after cache directory is created but before
@@ -156,8 +160,8 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
     context = t.context;
     appIsRunning = true;
 
-    if (options.afterStartCb) {
-      await options.afterStartCb(t);
+    for (const callback of afterStartCallbacks) {
+      await callback(t);
     }
 
     return app;

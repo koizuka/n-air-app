@@ -1,7 +1,10 @@
 import { ApiClient } from './api-client';
 import {
-  ISceneApi, ISceneItemApi, IScenesServiceApi, TSceneNode, TSceneNodeApi,
-  TSceneNodeType
+  ScenesService,
+  Scene,
+  TSceneNodeType,
+  SceneItem,
+  SceneItemNode,
 } from '../../app/services/scenes';
 import { TSourceType } from '../../app/services/sources';
 
@@ -39,7 +42,7 @@ interface ISceneBuilderNode {
  */
 export class SceneBuilder {
 
-  private scenesService: IScenesServiceApi;
+  private scenesService: ScenesService;
 
   /**
    * `Item:` will be converted to this default type
@@ -51,15 +54,17 @@ export class SceneBuilder {
    */
   private offsetSize = 2;
 
-  constructor (api: ApiClient) {
-    this.scenesService = api.getResource<IScenesServiceApi>('ScenesService');
+  constructor(api: ApiClient) {
+    this.scenesService = api.getResource<ScenesService>('ScenesService');
   }
 
-  get scene(): ISceneApi {
+  get scene(): Scene {
     return this.scenesService.activeScene;
   }
 
   parse(sketch: string): ISceneBuilderNode[] {
+    if (sketch === '') return [];
+
     let strings = sketch.split('\n');
     let offset = -1;
 
@@ -118,16 +123,15 @@ export class SceneBuilder {
       return {
         name: name.trim(),
         type: 'item',
-        sourceType: (sourceType.trim() || this.defaultSourceType) as TSourceType
+        sourceType: (sourceType.trim() || this.defaultSourceType) as TSourceType,
       };
     }
     return {
       name: line.trim(),
       type: 'folder',
-      children: []
+      children: [],
     };
   }
-
 
   build(scetch: string): ISceneBuilderNode[] {
     this.scene.clear();
@@ -149,14 +153,13 @@ export class SceneBuilder {
       this.scene.getFolder(folderId).getNodes() :
       this.scene.getRootNodes();
 
-
     return nodes.map(sceneNode => {
       if (sceneNode.isFolder()) {
         return {
           name: sceneNode.name,
           id: sceneNode.id,
           type: 'folder' as TSceneNodeType,
-          children: this.getSceneSchema(sceneNode.id)
+          children: this.getSceneSchema(sceneNode.id),
         };
       }
 
@@ -164,9 +167,8 @@ export class SceneBuilder {
         name: sceneNode.name,
         id: sceneNode.id,
         type: 'item' as TSceneNodeType,
-        sourceType: (sceneNode as ISceneItemApi).getSource().type
+        sourceType: (sceneNode as SceneItem).getSource().type,
       };
-
     });
   }
 
@@ -191,10 +193,9 @@ export class SceneBuilder {
     return sketch;
   }
 
-
   private buildNodes(nodes: ISceneBuilderNode[], parentId?: string): ISceneBuilderNode[] {
     nodes.reverse().forEach(node => {
-      let sceneNode: TSceneNodeApi;
+      let sceneNode: SceneItemNode;
 
       if (node.type === 'item') {
         sceneNode = this.scene.createAndAddSource(node.name, node.sourceType);
@@ -205,10 +206,8 @@ export class SceneBuilder {
 
       node.id = sceneNode.id;
       if (parentId) sceneNode.setParent(parentId);
-
     });
 
     return nodes;
   }
-
 }
