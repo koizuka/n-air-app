@@ -169,7 +169,6 @@ export class SourcesService extends StatefulService<ISourcesState> implements IS
       type: managerType,
     };
 
-    // if (source.hasProps()) setupConfigurableDefaults(obsInput);
     this.sourceAdded.next(source.state);
     if (options.audioSettings) this.audioService.getSource(id).setSettings(options.audioSettings);
   }
