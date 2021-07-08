@@ -49,8 +49,10 @@ if (process.env.NAIR_CACHE_DIR) {
     'nair-client',
     'log.log'
   );
+  app.setPath('userData', path.join(app.getPath('appData'), 'nair-client'));
+} else {
+  app.setPath('userData', path.join(app.getPath('appData'), pjson.name));
 }
-app.setPath('userData', path.join(app.getPath('appData'), pjson.name));
 
 if (process.argv.includes('--clearCacheDir')) {
   const rmPath = app.getPath('userData');

@@ -1,4 +1,5 @@
 import { useSpectron, test } from '../helpers/spectron';
+import { sceneExisting } from '../helpers/spectron/scenes';
 
 const fs = require('fs');
 const path = require('path');
@@ -20,8 +21,8 @@ useSpectron({
   beforeAppStartCb: async t => {
     const dataDir = path.resolve(__dirname, '..', '..', '..', 'test', 'data');
 
-    fs.mkdirSync(path.join(t.context.cacheDir, 'n-air-app'));
-    const sceneCollectionsPath = path.join(t.context.cacheDir, 'n-air-app', 'SceneCollections');
+    fs.mkdirSync(path.join(t.context.cacheDir, 'nair-client'));
+    const sceneCollectionsPath = path.join(t.context.cacheDir, 'nair-client', 'SceneCollections');
     fs.mkdirSync(sceneCollectionsPath);
 
     await copyFile(
@@ -43,9 +44,9 @@ useSpectron({
  */
 test('Loading an old scene collection', async t => {
   // Make sure we loaded the scenes
-  t.true(await t.context.app.client.isExisting('li=Stream Starting Soon'));
-  t.true(await t.context.app.client.isExisting('li=Live Screen'));
-  t.true(await t.context.app.client.isExisting('li=Intermission'));
-  t.true(await t.context.app.client.isExisting('li=Be Right Back'));
-  t.true(await t.context.app.client.isExisting('li=Stream Ending Soon'));
+  t.true(await sceneExisting(t, 'Stream Starting Soon'));
+  t.true(await sceneExisting(t, 'Live Screen'));
+  t.true(await sceneExisting(t, 'Intermission'));
+  t.true(await sceneExisting(t, 'Be Right Back'));
+  t.true(await sceneExisting(t, 'Stream Ending Soon'));
 });
