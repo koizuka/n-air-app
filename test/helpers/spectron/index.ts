@@ -167,7 +167,7 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
     return app;
   }
 
-  async function stopApp() {
+  async function stopApp(clearCache = true) {
     try {
       await app.stop();
     } catch (e) {
@@ -176,6 +176,7 @@ export function useSpectron(options: ITestRunnerOptions = {}) {
     }
     appIsRunning = false;
 
+    if (!clearCache) return;
     await new Promise(resolve => {
       rimraf(context.cacheDir, resolve);
     });

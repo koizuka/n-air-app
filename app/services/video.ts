@@ -183,26 +183,10 @@ export class Display {
 }
 
 export class VideoService extends Service {
-
   @Inject() settingsService: SettingsService;
-
-  activeDisplays: Dictionary<Display> = {};
 
   init() {
     this.settingsService.loadSettingsIntoStore();
-
-    // Watch for changes to the base resolution.
-    // This seems super freaking hacky.
-    this.settingsService.store.watch(state => {
-      return state.SettingsService.Video.Base;
-    }, () => {
-      // This gives the setting time to propagate
-      setTimeout(() => {
-        Object.values(this.activeDisplays).forEach(display => {
-          display.refreshOutputRegion();
-        });
-      }, 1000);
-    });
   }
 
   // Generates a random string:
