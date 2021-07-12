@@ -1,11 +1,11 @@
 import Vue from 'vue';
 import { without } from 'lodash';
-import { StatefulService, mutation } from 'services/core/stateful-service';
+import { Subject } from 'rxjs';
+import { mutation, StatefulService } from 'services/core/stateful-service';
 import { TransitionsService } from 'services/transitions';
 import { WindowsService } from 'services/windows';
 import { Scene, SceneItem } from './index';
-import { SourcesService, ISource, ISourceAddOptions } from 'services/sources';
-import { Subject } from 'rxjs';
+import { ISource, SourcesService, ISourceAddOptions } from 'services/sources';
 import { Inject } from 'services/core/injector';
 import * as obs from '../../../obs-api';
 import { $t } from 'services/i18n';
@@ -100,11 +100,10 @@ export interface ISceneItemFolder extends ISceneItemNode {
 }
 
 export class ScenesService extends StatefulService<IScenesState> {
-
   static initialState: IScenesState = {
     activeSceneId: '',
     displayOrder: [],
-    scenes: {}
+    scenes: {},
   };
 
   sceneAdded = new Subject<IScene>();
@@ -124,7 +123,7 @@ export class ScenesService extends StatefulService<IScenesState> {
       id,
       name,
       resourceId: 'Scene' + JSON.stringify([id]),
-      nodes: []
+      nodes: [],
     });
     this.state.displayOrder.push(id);
     this.state.activeSceneId = this.state.activeSceneId;
@@ -147,7 +146,6 @@ export class ScenesService extends StatefulService<IScenesState> {
     this.state.displayOrder = order;
   }
 
-
   createScene(name: string, options: ISceneCreateOptions = {}) {
     // Get an id to identify the scene on the frontend
     const id = options.sceneId || `scene_${uuid()}`;
@@ -159,17 +157,20 @@ export class ScenesService extends StatefulService<IScenesState> {
       const oldScene = this.getScene(options.duplicateSourcesFromScene);
       const newScene = this.getScene(id);
 
-      oldScene.getItems().slice().reverse().forEach(item => {
-        const newItem = newScene.addSource(item.sourceId);
-        newItem.setSettings(item.getSettings());
-      });
+      oldScene
+        .getItems()
+        .slice()
+        .reverse()
+        .forEach(item => {
+          const newItem = newScene.addSource(item.sourceId);
+          newItem.setSettings(item.getSettings());
+        });
     }
 
     this.sceneAdded.next(this.state.scenes[id]);
     if (options.makeActive) this.makeSceneActive(id);
     return this.getScene(id);
   }
-
 
   removeScene(id: string, force = false): IScene {
     if (!force && Object.keys(this.state.scenes).length < 2) {
@@ -209,11 +210,9 @@ export class ScenesService extends StatefulService<IScenesState> {
     this.scenes.forEach(scene => scene.remove(true));
   }
 
-
   setLockOnAllScenes(locked: boolean) {
     this.scenes.forEach(scene => scene.setLockOnAllItems(locked));
   }
-
 
   getSourceScenes(sourceId: string): Scene[] {
     const resultScenes: Scene[] = [];
@@ -223,7 +222,6 @@ export class ScenesService extends StatefulService<IScenesState> {
     });
     return resultScenes;
   }
-
 
   makeSceneActive(id: string): boolean {
     const scene = this.getScene(id);
@@ -238,20 +236,17 @@ export class ScenesService extends StatefulService<IScenesState> {
     return true;
   }
 
-
   setSceneOrder(order: string[]) {
     this.SET_SCENE_ORDER(order);
   }
 
-
   // Utility functions / getters
 
-
-  getModel(): IScenesState  {
+  getModel(): IScenesState {
     return this.state;
   }
 
-  getScene(id: string) {
+  getScene(id: string): Scene | null {
     return !this.state.scenes[id] ? null : new Scene(id);
   }
 
@@ -260,7 +255,7 @@ export class ScenesService extends StatefulService<IScenesState> {
     return foundId ? this.getScene(foundId) : null;
   }
 
-  getSceneItem(sceneItemId: string) {
+  getSceneItem(sceneItemId: string): SceneItem | null {
     for (const scene of this.scenes) {
       const sceneItem = scene.getItem(sceneItemId);
       if (sceneItem) return sceneItem;
@@ -284,11 +279,9 @@ export class ScenesService extends StatefulService<IScenesState> {
     });
   }
 
-
   get activeSceneId(): string {
     return this.state.activeSceneId;
   }
-
 
   get activeScene(): Scene {
     return this.getScene(this.state.activeSceneId);
@@ -296,39 +289,40 @@ export class ScenesService extends StatefulService<IScenesState> {
 
   suggestName(name: string): string {
     return namingHelpers.suggestName(name, (name: string) => {
-      const ind = this.activeScene
-        .getNodes()
-        .findIndex(node => node.name === name);
+      const ind = this.activeScene.getNodes().findIndex(node => node.name === name);
       return ind !== -1;
     });
   }
 
-
-  showNameScene(options: {rename?: string, itemsToGroup?: string[] } = {}) {
+  showNameScene(options: { rename?: string; itemsToGroup?: string[] } = {}) {
     this.windowsService.showWindow({
       componentName: 'NameScene',
       title: options.rename ? $t('scenes.renameScene') : $t('scenes.nameScene'),
       queryParams: options,
       size: {
         width: 400,
-        height: 250
-      }
+        height: 250,
+      },
     });
   }
 
-
-  showNameFolder(options: { renameId?: string, itemsToGroup?: string[], parentId?: string } = {}) {
+  showNameFolder(
+    options: {
+      renameId?: string;
+      itemsToGroup?: string[];
+      parentId?: string;
+    } = {},
+  ) {
     this.windowsService.showWindow({
       componentName: 'NameFolder',
       title: options.renameId ? $t('sources.renameFolder') : $t('sources.nameFolder'),
       queryParams: options,
       size: {
         width: 400,
-        height: 250
-      }
+        height: 250,
+      },
     });
   }
-
 
   showDuplicateScene(sceneName: string) {
     this.windowsService.showWindow({
@@ -337,9 +331,8 @@ export class ScenesService extends StatefulService<IScenesState> {
       queryParams: { sceneToDuplicate: sceneName },
       size: {
         width: 400,
-        height: 250
-      }
+        height: 250,
+      },
     });
   }
 }
-

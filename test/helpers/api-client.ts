@@ -15,7 +15,6 @@ let clientInstance: ApiClient = null;
 export type TConnectionStatus = 'disconnected' | 'pending' | 'connected';
 
 export class ApiClient {
-
   eventReceived = new Subject<IJsonRpcEvent>();
 
   private nextRequestId = 1;
@@ -208,9 +207,7 @@ export class ApiClient {
             const eventSubject = this.subscriptions[message.result.resourceId];
             this.eventReceived.next(result);
             if (eventSubject) eventSubject.next(result.data);
-
           } else if (result.emitter === 'PROMISE') {
-
             // case when listenAllSubscriptions = true
             if (!this.promises[result.resourceId]) return;
 
@@ -255,7 +252,6 @@ export class ApiClient {
       } else if (result && (result._type === 'HELPER' || result._type === 'SERVICE')) {
         return this.getResource(result.resourceId, result);
       } else {
-
         // result can contain helpers-objects
 
         if (Array.isArray(result)) {
@@ -269,7 +265,6 @@ export class ApiClient {
 
         return result;
       }
-
     };
 
     return new Proxy(resourceModel, {
