@@ -148,4 +148,10 @@ export default class Utils {
       });
     });
   }
+  static makeChildWindowVisible() {
+    const childWindowId: number = electron.ipcRenderer.sendSync('getWindowIds').child;
+    const childWindow = electron.remote.BrowserWindow.fromId(childWindowId);
+    childWindow.show();
+    childWindow.restore();
+  }
 }

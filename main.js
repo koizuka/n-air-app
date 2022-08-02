@@ -372,7 +372,10 @@ if (!gotTheLock) {
 
     // Pre-initialize the child window
     childWindow = new BrowserWindow({
-      parent: mainWindow,
+      // FIXME: メインウィンドウを parent にするとウィンドウキャプチャが落ちる場合がある
+      // しかしこの指定がないと childWindow が mainWindow より後ろに隠れることがある
+      // @see https://github.com/n-air-app/n-air-app/pull/225
+//      parent: mainWindow,
       minimizable: false,
       show: false,
       frame: false,
@@ -381,6 +384,8 @@ if (!gotTheLock) {
     });
 
     childWindow.removeMenu();
+
+    childWindow.loadURL(`${global.indexUrl}?windowId=child`);
 
     // The child window is never closed, it just hides in the
     // background until it is needed.
@@ -685,4 +690,13 @@ if (!gotTheLock) {
       mainWindow.send('showErrorAlert');
     }
   });
+
+  ipcMain.on('getWindowIds', e => {
+    e.returnValue = {
+//      worker: workerWindow.id,
+      main: mainWindow.id,
+      child: childWindow.id,
+    };
+  });
+
 }

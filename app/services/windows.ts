@@ -147,12 +147,62 @@ export class WindowsService extends StatefulService<IWindowsState> {
   showWindow(options: Partial<IWindowOptions>) {
     // Don't center the window if it's the same component
     // This prevents "snapping" behavior when navigating settings
-    if (options.componentName !== this.state.child.componentName) options.center = true;
+    if (options.componentName !== this.state.child.componentName) {
+      options.center = true;
+    }
 
-    ipcRenderer.send('window-showChildWindow', options);
-    this.updateChildWindowOptions(options);
+    /*
+     * Override `options.size` when what is passed in is bigger than the current display.
+     * We do not do this on CI since it runs at 1024x768 and it break tests that aren't easy
+     * to workaround.
+     */
+    if (options.size) {
+      const { width: screenWidth, height: screenHeight } =
+        electron.remote.screen.getDisplayMatching(this.windows.main.getBounds()).workAreaSize;
+
+      const SCREEN_PERCENT = 0.75;
+
+      if (options.size.width > screenWidth || options.size.height > screenHeight) {
+        options.size = {
+          width: Math.round(screenWidth * SCREEN_PERCENT),
+          height: Math.round(screenHeight * SCREEN_PERCENT),
+        };
+      }
+    }
+
+    const mainWindow = this.windows.main;
+    const childWindow = this.windows.child;
+
+    // Center the child window on the main window
+
+    // For some unknown reason, electron sometimes gets into a
+    // weird state where this will always fail.  Instead, we
+    // should recover by simply setting the size and forgetting
+    // about the bounds.
+    try {
+      const bounds = mainWindow.getBounds();
+      const childX = bounds.x + bounds.width / 2 - options.size.width / 2;
+      const childY = bounds.y + bounds.height / 2 - options.size.height / 2;
+
+      this.updateChildWindowOptions(options);
+      childWindow.setMinimumSize(options.size.width, options.size.height);
+      if (options.center) {
+        childWindow.setBounds({
+          x: Math.floor(childX),
+          y: Math.floor(childY),
+          width: options.size.width,
+          height: options.size.height,
+        });
+      }
+    } catch (err) {
+      console.error('Recovering from error:', err);
+
+      childWindow.setMinimumSize(options.size.width, options.size.height);
+      childWindow.setSize(options.size.width, options.size.height);
+      childWindow.center();
+      childWindow.focus();
+    }
   }
-
   closeChildWindow() {
     const windowOptions = this.state.child;
 

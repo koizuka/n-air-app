@@ -4,6 +4,7 @@ import { Component, Watch } from 'vue-property-decorator';
 import { Inject } from 'services/core/injector';
 import { getComponents, IWindowOptions, WindowsService } from 'services/windows';
 import TitleBar from '../TitleBar.vue';
+import Utils from 'services/utils';
 
 @Component({
   components: {
@@ -42,6 +43,8 @@ export default class ChildWindow extends Vue {
   }
 
   private onWindowUpdatedHandler(options: IWindowOptions) {
+    // TODO: windowSizeHandler 対応
+    //    window.removeEventListener('resize', this.windowSizeHandler);
     // If the window was closed, just clear the stack
     if (!options.isShown) {
       this.clearComponentStack();
@@ -49,16 +52,12 @@ export default class ChildWindow extends Vue {
     }
 
     if (options.preservePrevWindow) {
-      this.currentComponent.isShown = false;
-      this.components.push({ name: options.componentName, isShown: true, title: options.title });
-      this.setWindowTitle();
+      this.handlePreservePrevWindow(options);
       return;
     }
 
     if (options.isPreserved) {
-      this.components.pop();
-      this.currentComponent.isShown = true;
-      this.setWindowTitle();
+      this.handleIsPreservedWindow();
       return;
     }
 
@@ -68,9 +67,40 @@ export default class ChildWindow extends Vue {
     // at having a successful paint cycle before loading a component
     // that will do a bunch of synchronous IO.
     clearTimeout(this.refreshingTimeout);
-    this.refreshingTimeout = window.setTimeout(() => {
-      this.components.push({ name: options.componentName, isShown: true, title: options.title });
+    Utils.makeChildWindowVisible();
+    this.refreshingTimeout = window.setTimeout(async () => {
+      this.components.push({
+        name: options.componentName,
+        isShown: true,
+        title: options.title,
+        // TODO: hideStyleblockers 対応
+        //        hideStyleBlockers: options.hideStyleBlockers,
+      });
       this.setWindowTitle();
+      // TODO: windowSizeHandler 対応
+      //      window.addEventListener('resize', this.windowSizeHandler);
     }, 50);
+  }
+
+  private handlePreservePrevWindow(options: IWindowOptions) {
+    this.currentComponent.isShown = false;
+    this.components.push({
+      name: options.componentName,
+      isShown: true,
+      title: options.title,
+      // TODO: hideStyleblockers 対応
+      //     hideStyleBlockers: options.hideStyleBlockers,
+    });
+    this.setWindowTitle();
+    // TODO: windowSizeHandler 対応
+    //   window.addEventListener('resize', this.windowSizeHandler);
+  }
+
+  private handleIsPreservedWindow() {
+    this.components.pop();
+    this.currentComponent.isShown = true;
+    this.setWindowTitle();
+    // TODO: windowSizeHandler 対応
+    //    window.addEventListener('resize', this.windowSizeHandler);
   }
 }
