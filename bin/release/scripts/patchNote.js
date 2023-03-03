@@ -16,7 +16,7 @@ function parseVersion(tag) {
   throw new Error(`cannot parse a given tag: ${tag}`);
 }
 
-/** @typedef {{ channel: 'stable' | 'unstable', environment: 'public' | 'internal' }} VersionContext */
+/** @typedef {{ channel: 'stable' | 'unstable' | 'dev', environment: 'public' | 'internal' }} VersionContext */
 
 /**
  * @param {string} tag
@@ -31,7 +31,7 @@ function getVersionContext(tag) {
   const channel = result.channel || 'stable';
   const environment = result.internalMark ? 'internal' : 'public';
 
-  if (channel !== 'stable' && channel !== 'unstable') {
+  if (channel !== 'stable' && channel !== 'unstable' && channel !== 'dev') {
     throw new Error(`invalid channel: ${channel}`);
   }
 

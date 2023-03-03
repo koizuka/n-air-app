@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e # exit when error
 
-: ${SENTRY_CLI?"need to set sently-cli command"}
+export SENTRY_ORG="akihiko-koizuka"
+
+export SENTRY_CLI="$(dirname $0)/node_modules/\@sentry/cli/bin/sentry-cli"
 
 BASEDIR=$(git rev-parse --show-cdup)
 

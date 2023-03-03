@@ -1,12 +1,12 @@
 {
-  "name": "n-air-app",
+  "name": "n-air-dev",
   "description": "Streaming application for niconico",
   "author": "DWANGO Co.,Ltd.",
   "license": "GPL-3.0",
   "//": {
     "version": "0.11.2"
   },
-  "version": "1.1.20210826-unstable.1",
+  "version": "1.1.20230316-dev.8",
   "main": "main.js",
   "engines": {
     "npm": "please-use-yarn"
@@ -15,22 +15,26 @@
     "chrome >= 76"
   ],
   "scripts": {
-    "compile": "yarn clear && webpack-cli --progress --mode development",
+    "sentry": "bash bin/upload-to-sentry.sh",
+    "pre": "npm version --no-git-tag-version prerelease",
+    "compile": "yarn pre && yarn clear && webpack-cli --progress --mode development && yarn sentry",
     "compile:ci": "yarn clear && webpack-cli --mode development",
-    "compile:production": "yarn clear && webpack-cli --progress --mode production",
+    "compile:production": "yarn pre && yarn clear && webpack-cli --progress --mode production && yarn sentry",
     "watch": "yarn clear && webpack-cli --watch --progress --mode development",
-    "start": "node bin/start-with-auto-env.js",
+    "start": "cross-env NAIR_REPORT_TO_SENTRY=1 node bin/start-with-auto-env.js",
     "dev:server": "webpack-cli serve --progress --hot --mode development",
     "dev:start": "cross-env NAIR_UNSTABLE=1 DEV_SERVER=\"http://localhost:8080/index.dev.html\" electron . && echo 'electron exited.'",
     "dev": "run-p dev:*",
     "start:stable": "electron .",
     "start:unstable": "cross-env NAIR_UNSTABLE=1 electron .",
+    "start:dev": "cross-env NAIR_UNSTABLE=1 electron .",
     "clear-plugins": "shx rm -rf plugins",
-    "package": "yarn package:public-stable",
+    "package": "yarn package:dev",
     "package:public-stable": "shx rm -rf dist && yarn install --cwd bin && node bin/convert-to-shiftjis.js AGREEMENT && build -w --x64 --config electron-builder/stable.config.js",
     "package:public-unstable": "shx rm -rf dist && yarn install --cwd bin && node bin/convert-to-shiftjis.js AGREEMENT && build -w --x64 --config electron-builder/unstable.config.js",
     "package:internal-stable": "shx rm -rf dist && yarn install --cwd bin && node bin/convert-to-shiftjis.js AGREEMENT && build -w --x64 --config electron-builder/internal-stable.config.js",
     "package:internal-unstable": "shx rm -rf dist && yarn install --cwd bin && node bin/convert-to-shiftjis.js AGREEMENT && build -w --x64 --config electron-builder/internal-unstable.config.js",
+    "package:dev": "shx rm -rf dist && yarn install --cwd bin && node bin/convert-to-shiftjis.js AGREEMENT && build -w --x64 --config electron-builder/dev.config.js",
     "release": "yarn install --cwd bin && node bin/release/mini-release.js",
     "patch-note": "yarn install --cwd bin && node bin/release/generatePatchNote.js",
     "webfont": "yarn install --cwd bin && node bin/generate-webfont.js",
