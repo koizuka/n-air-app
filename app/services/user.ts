@@ -40,6 +40,7 @@ import { addClipboardMenu } from 'util/addClipboardMenu';
 // Eventually we will support authing multiple platforms at once
 interface IUserServiceState {
   auth?: IPlatformAuth;
+  sessionReceived?: boolean;
 }
 
 export class UserService extends PersistentStatefulService<IUserServiceState> {
@@ -57,6 +58,13 @@ export class UserService extends PersistentStatefulService<IUserServiceState> {
   @mutation()
   LOGOUT() {
     Vue.delete(this.state, 'auth');
+    Vue.delete(this.state, 'sessionReceived');
+  }
+
+  @mutation()
+  private SESSION_RECEIVED(received: boolean) {
+    console.log('SESSION_RECEIVED', received); // DEBUG
+    this.state.sessionReceived = received;
   }
 
   @mutation()
@@ -184,7 +192,9 @@ export class UserService extends PersistentStatefulService<IUserServiceState> {
   }
 
   async showLogin() {
-    if (this.isLoggedIn()) await this.logOut();
+    if (!this.state.sessionReceived) {
+      if (this.isLoggedIn()) await this.logOut();
+    }
     this.onboardingService.start({ isLogin: true });
   }
 
@@ -267,6 +277,58 @@ export class UserService extends PersistentStatefulService<IUserServiceState> {
 
     authWindow.setMenu(null);
     authWindow.loadURL(service.authUrl);
+  }
+
+  proceedLogin({ service, session, secureSession }: { service: string, session: string, secureSession: string }) {
+    // TODO niconico専用なのでniconico側に移動する
+    if (service !== 'niconico') {
+      console.warn('proceedLogin: service is not niconico', service);
+      return; // ignore
+    }
+    if (!session || !secureSession) {
+      console.warn('proceedLogin: session or secureSession is empty', session, secureSession);
+      return; // ignore
+    }
+
+    // TODO ログイン待ちならログイン待ちを閉じる
+
+    (async () => {
+
+      // 一旦ログアウト
+      if (this.isLoggedIn()) {
+        await this.logOut();
+      }
+
+      // ログイン状態を更新(niconico)
+      try {
+        const cookies = electron.remote.session.defaultSession.cookies;
+        await cookies.set({
+          url: 'https://.nicovideo.jp',
+          name: 'user_session',
+          value: session,
+        });
+        await cookies.set({
+          url: 'https://.nicovideo.jp',
+          name: 'user_session_secure',
+          value: secureSession,
+          secure: true,
+          httpOnly: true,
+        });
+      } catch (e) {
+        console.error('proceedLogin: failed to set cookie', e);
+        return;
+      }
+
+      this.SESSION_RECEIVED(true);
+      await this.showLogin();
+
+      /*
+      // ログインバリデーション
+      await this.validateLogin();
+      console.log('login status: ', this.isLoggedIn());
+      */
+    })();
+
   }
 
   /**

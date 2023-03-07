@@ -3,6 +3,8 @@ import electron from 'electron';
 import { URL, URLSearchParams } from 'url';
 import { Inject } from 'services/core/injector';
 import { NavigationService } from 'services/navigation';
+import { UserService } from './user';
+import { SettingsService } from './settings';
 
 function protocolHandler(base: string) {
   return (target: any, methodName: string, descriptor: PropertyDescriptor) => {
@@ -23,6 +25,8 @@ interface IProtocolLinkInfo {
 
 export class ProtocolLinksService extends Service {
   @Inject() navigationService: NavigationService;
+  @Inject() userService: UserService;
+  @Inject() settingsService: SettingsService;
 
   // Maps base URL components to handler function names
   private handlers: Dictionary<string>;
@@ -34,8 +38,10 @@ export class ProtocolLinksService extends Service {
     });
 
     // Other instances started with a protocol link will receive this message
-    electron.ipcRenderer.on('protocolLink', (event: Electron.Event, link: string) =>
-      this.handleLink(link),
+    electron.ipcRenderer.on('protocolLink', (event: Electron.Event, link: string) => {
+      console.log('protocolLink (second instance): ', link); // DEBUG
+      this.handleLink(link);
+    },
     );
   }
 
@@ -51,4 +57,21 @@ export class ProtocolLinksService extends Service {
       this[this.handlers[info.base]](info);
     }
   }
+
+  @protocolHandler('login')
+  private login(info: IProtocolLinkInfo) {
+    this.userService.proceedLogin({
+      service: info.query.get('service'),
+      session: info.query.get('u'),
+      secureSession: info.query.get('s'),
+    });
+  }
+
+  @protocolHandler('settings')
+  private openSettings(info: IProtocolLinkInfo) {
+    const category = info.path.replace('/', '');
+
+    this.settingsService.showSettings(category);
+  }
+
 }

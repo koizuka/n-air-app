@@ -17,6 +17,12 @@ export default class Connect extends Vue {
 
   loadingState = false;
 
+  mounted() {
+    if (this.userService.state.sessionReceived) {
+      this.authPlatform('niconico');
+    }
+  }
+
   authPlatform(platform: TPlatform) {
     this.loadingState = true;
     this.userService.startAuth({
