@@ -279,14 +279,14 @@ export class UserService extends PersistentStatefulService<IUserServiceState> {
     authWindow.loadURL(service.authUrl);
   }
 
-  proceedLogin({ service, session, secureSession }: { service: string, session: string, secureSession: string }) {
+  proceedLogin({ service, session }: { service: string, session: string }) {
     // TODO niconico専用なのでniconico側に移動する
     if (service !== 'niconico') {
       console.warn('proceedLogin: service is not niconico', service);
       return; // ignore
     }
-    if (!session || !secureSession) {
-      console.warn('proceedLogin: session or secureSession is empty', session, secureSession);
+    if (!session) {
+      console.warn('proceedLogin: session is empty');
       return; // ignore
     }
 
@@ -306,11 +306,6 @@ export class UserService extends PersistentStatefulService<IUserServiceState> {
           url: 'https://.nicovideo.jp',
           name: 'user_session',
           value: session,
-        });
-        await cookies.set({
-          url: 'https://.nicovideo.jp',
-          name: 'user_session_secure',
-          value: secureSession,
           secure: true,
           httpOnly: true,
         });

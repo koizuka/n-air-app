@@ -63,7 +63,6 @@ export class ProtocolLinksService extends Service {
     this.userService.proceedLogin({
       service: info.query.get('service'),
       session: info.query.get('u'),
-      secureSession: info.query.get('s'),
     });
   }
 
