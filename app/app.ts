@@ -108,6 +108,7 @@ if ((isProduction || process.env.NAIR_REPORT_TO_SENTRY) && !electron.remote.proc
     dsn: sentryDsn,
     release: nAirVersion,
     sampleRate: /* isPreview ? */ 1.0 /* : 0.1 */,
+    Vue,
   }, sentryVueInit);
 
   const oldConsoleError = console.error;
