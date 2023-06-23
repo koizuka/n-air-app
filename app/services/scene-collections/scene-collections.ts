@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/electron/renderer';
 import { Service } from 'services/core/service';
 import { Inject } from 'services/core/injector';
 import { RootNode } from './nodes/root';

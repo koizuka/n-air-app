@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/vue'
+import * as Sentry from '@sentry/electron/renderer'
 import { StatefulService, mutation } from 'services/core/stateful-service';
 import { ISceneCollectionsManifestEntry } from '.';
 import Vue from 'vue';

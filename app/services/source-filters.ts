@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/electron/renderer';
 import { Service } from './core/service';
 import {
   TObsFormData,

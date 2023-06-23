@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/electron/renderer';
 import { FailedResult, NotLoggedInError } from './NicoliveClient';
 import { $t } from 'services/i18n';
 import { remote } from 'electron';

@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/electron/renderer';
 import { IObsInput, IObsListInput, TObsFormData, TObsValue } from 'components/obs/inputs/ObsInput';
 import { $t } from 'services/i18n';
 import { ISettingsSubCategory } from './settings-api';

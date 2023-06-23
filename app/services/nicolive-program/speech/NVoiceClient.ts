@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/electron/renderer';
 import { ChildProcess, spawn } from 'child_process';
 import { existsSync, readdirSync, readFileSync, unlinkSync } from 'fs';
 import { basename, join } from 'path';

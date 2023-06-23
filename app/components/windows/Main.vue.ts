@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/electron/renderer';
 import electron from 'electron';
 import { AppService } from 'services/app';
 import { CompactModeService } from 'services/compact-mode';

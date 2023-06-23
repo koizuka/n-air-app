@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/electron/renderer';
 import { remote, ipcRenderer } from 'electron';
 import {
   ProgramSchedules,
