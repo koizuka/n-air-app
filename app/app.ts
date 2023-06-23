@@ -108,7 +108,7 @@ if ((isProduction || process.env.NAIR_REPORT_TO_SENTRY) && !electron.remote.proc
     dsn: sentryDsn,
     release: `n-air-dev@${nAirVersion}`,
     sampleRate: /* isPreview ? */ 1.0 /* : 0.1 */,
-    // Vue,
+    Vue,
   }, sentryVueInit);
   Sentry.captureMessage('App started'); // DEBUG
 
