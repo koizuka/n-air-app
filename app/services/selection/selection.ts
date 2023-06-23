@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/electron/renderer';
+import * as Sentry from '@sentry/vue';
 import { uniq } from 'lodash';
 import electron from 'electron';
 import { mutation, StatefulService, ServiceHelper } from 'services/core';

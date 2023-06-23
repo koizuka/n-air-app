@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/electron/renderer';
+import * as Sentry from '@sentry/vue';
 import cloneDeep from 'lodash/cloneDeep';
 import { StatefulService, mutation } from 'services/core/stateful-service';
 import {

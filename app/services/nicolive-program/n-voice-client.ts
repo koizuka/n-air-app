@@ -1,6 +1,6 @@
 // N Voice Client Service
 
-import * as Sentry from '@sentry/electron/renderer';
+import * as Sentry from '@sentry/vue';
 import electron from 'electron';
 import { join } from 'path';
 import { StatefulService } from 'services/core/stateful-service';
@@ -74,7 +74,8 @@ async function showError(err: Error): Promise<void> {
 
 export class NVoiceClientService
   extends StatefulService<INVoiceClientState>
-  implements INVoiceTalker {
+  implements INVoiceTalker
+{
   static initialState: INVoiceClientState = {
     enabled: true,
   };

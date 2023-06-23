@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/electron/renderer';
+import * as Sentry from '@sentry/vue';
 import { Speech } from '../nicolive-comment-synthesizer';
 import { ISpeechSynthesizer } from './ISpeechSynthesizer';
 
