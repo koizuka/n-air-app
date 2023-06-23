@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/electron/renderer';
 import * as electron from 'electron';
 import moment from 'moment';
 import { Subject } from 'rxjs';
