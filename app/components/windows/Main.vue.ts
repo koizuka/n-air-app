@@ -42,6 +42,7 @@ export default class Main extends Vue {
   mounted() {
     electron.remote.getCurrentWindow().show();
     WindowSizeService.instance; // manage compact mode
+    Sentry.captureMessage('App.vue mounted'); // DEBUG
   }
 
   get isCompactMode() {
