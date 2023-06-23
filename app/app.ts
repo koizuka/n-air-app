@@ -106,7 +106,7 @@ if ((isProduction || process.env.NAIR_REPORT_TO_SENTRY) && !electron.remote.proc
   console.log(`Sentry DSN: ${sentryDsn}`);
   Sentry.init({
     dsn: sentryDsn,
-    release: nAirVersion,
+    release: `n-air-dev@${nAirVersion}`,
     sampleRate: /* isPreview ? */ 1.0 /* : 0.1 */,
     Vue,
   }, sentryVueInit);
