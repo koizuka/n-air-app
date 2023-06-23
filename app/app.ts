@@ -110,6 +110,7 @@ if ((isProduction || process.env.NAIR_REPORT_TO_SENTRY) && !electron.remote.proc
     sampleRate: /* isPreview ? */ 1.0 /* : 0.1 */,
     // Vue,
   }, sentryVueInit);
+  Sentry.captureMessage('App started'); // DEBUG
 
   const oldConsoleError = console.error;
 
