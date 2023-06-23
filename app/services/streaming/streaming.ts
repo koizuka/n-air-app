@@ -94,6 +94,7 @@ export class StreamingService
     obs.NodeObs.OBS_service_connectOutputSignals((info: IOBSOutputSignalInfo) => {
       this.handleOBSOutputSignal(info);
     });
+    Sentry.captureMessage('StreamingService.init'); // DEBUG
   }
 
   getModel() {
@@ -167,6 +168,8 @@ export class StreamingService
       },
       options,
     );
+
+    Sentry.captureMessage('toggleStreamingAsync', { extra: { isStreaming: this.isStreaming } }); // DEBUG
 
     if (this.isStreaming) {
       this.toggleStreaming();
