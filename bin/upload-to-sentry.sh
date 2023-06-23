@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e # exit when error
 
-export SENTRY_ORG="n-air-app"
+export SENTRY_ORG="akihiko-koizuka"
 
 export SENTRY_CLI="$(dirname $0)/node_modules/\@sentry/cli/bin/sentry-cli"
 

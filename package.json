@@ -1,12 +1,12 @@
 {
-  "name": "n-air-app-dwango",
+  "name": "n-air-dev",
   "description": "Streaming application for niconico",
   "author": "DWANGO Co.,Ltd.",
   "license": "GPL-3.0",
   "//": {
     "version": "0.11.2"
   },
-  "version": "1.1.20230623-unstable.0d",
+  "version": "1.1.20230623-dev.0",
   "main": "main.js",
   "engines": {
     "npm": "please-use-yarn"
@@ -17,9 +17,9 @@
   "scripts": {
     "sentry": "bash bin/upload-to-sentry.sh",
     "pre": "npm version --no-git-tag-version prerelease",
-    "compile": "yarn clear && webpack-cli --progress --mode development && yarn sentry",
+    "compile": "yarn pre && yarn clear && webpack-cli --progress --mode development && yarn sentry",
     "compile:ci": "yarn clear && webpack-cli --mode development",
-    "compile:production": "yarn clear && webpack-cli --progress --mode production && yarn sentry",
+    "compile:production": "yarn pre && yarn clear && webpack-cli --progress --mode production && yarn sentry",
     "watch": "yarn clear && webpack-cli --watch --progress --mode development",
     "start": "cross-env NAIR_REPORT_TO_SENTRY=1 node bin/start-with-auto-env.js",
     "dev:server": "webpack-cli serve --progress --hot --mode development",

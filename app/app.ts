@@ -36,7 +36,8 @@ type SentryParams = {
   key: string;
   project: string;
 };
-const sentryOrg = 'o170115';
+// Akihiko Koizuka n-air-dev
+const sentryOrg = 'o159526';
 
 function getSentryDsn(p: SentryParams): string {
   return `https://${p.key}@${p.organization}.ingest.sentry.io/${p.project}`;
@@ -49,18 +50,11 @@ function getSentryCrashReportUrl(p: SentryParams): string {
 // This is the development DSN
 const sentryParam: SentryParams = {
   organization: sentryOrg,
-  project: '1262580',
-  key: '1cb5cdf6a93c466dad570861b8c82b61',
+  project: '1222027',
+  key: '9264887647bb4b108355c6bef3a9bb5d',
 };
 
 if (isProduction) {
-  /*
-  // This is the production DSN
-  sentryParam = Utils.isUnstable()
-    ? { organization: sentryOrg, project: '1546758', key: '7451aaa71b7640a69ee1d31d6fd9ef78' }
-    : { organization: sentryOrg, project: '1246812', key: '35a02d8ebec14fd3aadc9d95894fabcf' };
-    */
-
   electron.crashReporter.start({
     productName: 'n-air-app',
     companyName: 'n-air-app',

@@ -254,7 +254,7 @@ if (!gotTheLock) {
     dialog.showErrorBox(
       '予期せぬエラー',
       '予期しないエラーが発生したため、アプリケーションをシャットダウンします。ご不便をおかけして申し訳ありません。\n' +
-        'この件に関する情報はデバッグ目的で送信されました。不具合を解決するためにご協力いただきありがとうございます。',
+      'この件に関する情報はデバッグ目的で送信されました。不具合を解決するためにご協力いただきありがとうございます。',
     );
 
     // ダイアログが閉じたら終了
@@ -264,11 +264,9 @@ if (!gotTheLock) {
   }
 
   if (pjson.env === 'production' || process.env.NAIR_REPORT_TO_SENTRY) {
-    const params = process.env.NAIR_UNSTABLE
-      ? { organization: 'o170115', project: '5372801', key: '819e76e51864453aafd28c6d0473881f' } // crash-reporter-unstable
-      : { organization: 'o170115', project: '1520076', key: 'd965eea4b2254c2b9f38d2346fb8a472' }; // crash-reporter
+    const params = { organization: 'o159526', project: '1222027', key: '9264887647bb4b108355c6bef3a9bb5d', }; // koizuka
 
-    process.on('uncaughtException', error => {
+    process.on('uncaughtException', (error) => {
       console.log('uncaughtException', error);
       handleFinishedReport();
     });
@@ -320,9 +318,9 @@ if (!gotTheLock) {
       title: process.env.NAIR_PRODUCT_NAME,
       ...(mainWindowIsVisible
         ? {
-            x: mainWindowState.x,
-            y: mainWindowState.y,
-          }
+          x: mainWindowState.x,
+          y: mainWindowState.y,
+        }
         : {}),
       webPreferences: { nodeIntegration: true, webviewTag: true },
     });
