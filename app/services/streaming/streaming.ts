@@ -141,6 +141,7 @@ export class StreamingService
     });
   }
 
+  logCounter = 0;
   /**
    * 配信開始ボタンまたはショートカットキーによる配信開始(対話可能)
    *
@@ -169,7 +170,12 @@ export class StreamingService
       options,
     );
 
-    Sentry.captureMessage('toggleStreamingAsync', { extra: { isStreaming: this.isStreaming } }); // DEBUG
+    Sentry.captureMessage(
+      `toggleStreamingAsync #${this.logCounter++} ${this.isStreaming ? 'off' : 'on'}`,
+      {
+        extra: { isStreaming: this.isStreaming },
+      }
+    ); // DEBUG
 
     if (this.isStreaming) {
       this.toggleStreaming();
