@@ -220,3 +220,7 @@ if (Utils.isDevMode()) {
     if (ev.key === 'F12') electron.ipcRenderer.send('openDevTools');
   });
 }
+
+setTimeout(() => {
+  throw new Error('test error'); // DEBUG
+})
