@@ -36,8 +36,8 @@ type SentryParams = {
   key: string;
   project: string;
 };
-// Akihiko Koizuka n-air-dev
-const sentryOrg = 'o159526';
+// dwango n-air-app-dwango
+const sentryOrg = 'o170115';
 
 function getSentryDsn(p: SentryParams): string {
   return `https://${p.key}@${p.organization}.ingest.sentry.io/${p.project}`;
@@ -50,9 +50,9 @@ function getSentryCrashReportUrl(p: SentryParams): string {
 // This is the development DSN
 const sentryParam: SentryParams = {
   organization: sentryOrg,
-  project: '1222027',
-  key: '9264887647bb4b108355c6bef3a9bb5d',
-};
+  project: '1262580',
+  key: '1cb5cdf6a93c466dad570861b8c82b61',
+}; // n-air-app-dwango
 
 if (isProduction) {
   electron.crashReporter.start({

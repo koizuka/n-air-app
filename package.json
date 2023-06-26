@@ -1,5 +1,5 @@
 {
-  "name": "n-air-dev",
+  "name": "n-air-app-dwango",
   "description": "Streaming application for niconico",
   "author": "DWANGO Co.,Ltd.",
   "license": "GPL-3.0",
@@ -29,7 +29,7 @@
     "start:unstable": "cross-env NAIR_UNSTABLE=1 electron .",
     "start:dev": "cross-env NAIR_UNSTABLE=1 electron .",
     "clear-plugins": "shx rm -rf plugins",
-    "package": "yarn package:dev",
+    "package": "yarn package:internal-unstable",
     "package:public-stable": "shx rm -rf dist && yarn install --cwd bin && node bin/convert-to-shiftjis.js AGREEMENT && build -w --x64 --config electron-builder/stable.config.js",
     "package:public-unstable": "shx rm -rf dist && yarn install --cwd bin && node bin/convert-to-shiftjis.js AGREEMENT && build -w --x64 --config electron-builder/unstable.config.js",
     "package:internal-stable": "shx rm -rf dist && yarn install --cwd bin && node bin/convert-to-shiftjis.js AGREEMENT && build -w --x64 --config electron-builder/internal-stable.config.js",

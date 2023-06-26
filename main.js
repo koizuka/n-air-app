@@ -254,7 +254,7 @@ if (!gotTheLock) {
     dialog.showErrorBox(
       '予期せぬエラー',
       '予期しないエラーが発生したため、アプリケーションをシャットダウンします。ご不便をおかけして申し訳ありません。\n' +
-      'この件に関する情報はデバッグ目的で送信されました。不具合を解決するためにご協力いただきありがとうございます。',
+        'この件に関する情報はデバッグ目的で送信されました。不具合を解決するためにご協力いただきありがとうございます。',
     );
 
     // ダイアログが閉じたら終了
@@ -264,9 +264,13 @@ if (!gotTheLock) {
   }
 
   if (pjson.env === 'production' || process.env.NAIR_REPORT_TO_SENTRY) {
-    const params = { organization: 'o159526', project: '1222027', key: '9264887647bb4b108355c6bef3a9bb5d', }; // koizuka
+    const params = {
+      organization: 'o170115',
+      project: '1262580',
+      key: '1cb5cdf6a93c466dad570861b8c82b61',
+    }; // n-air-app-dwango
 
-    process.on('uncaughtException', (error) => {
+    process.on('uncaughtException', error => {
       console.log('uncaughtException', error);
       handleFinishedReport();
     });
@@ -318,9 +322,9 @@ if (!gotTheLock) {
       title: process.env.NAIR_PRODUCT_NAME,
       ...(mainWindowIsVisible
         ? {
-          x: mainWindowState.x,
-          y: mainWindowState.y,
-        }
+            x: mainWindowState.x,
+            y: mainWindowState.y,
+          }
         : {}),
       webPreferences: { nodeIntegration: true, webviewTag: true },
     });
