@@ -6,6 +6,7 @@ import { handleErrors } from 'util/requests';
 import { WindowsService } from 'services/windows';
 import { InformationsStateService } from './state';
 import { $t } from 'services/i18n';
+import { isFakeMode } from 'util/fakeMode';
 
 function parseXml(xml: String): Promise<object> {
   return new Promise((resolve, reject) => {
@@ -90,6 +91,7 @@ export class InformationsService extends StatefulService<IInformationsState> {
   }
 
   async updateInformations() {
+    if (isFakeMode()) return;
     this.SET_HAS_ERROR(false);
     try {
       const feedResult = await this.fetchFeed();

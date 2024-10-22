@@ -11,6 +11,7 @@ import { NicoliveFailure, openErrorDialogFromFailure } from './NicoliveFailure';
 import { FilterRecord } from './ResponseTypes';
 import { NicoliveProgramService } from './nicolive-program';
 import { isNdgrFetchError } from './NdgrFetchError';
+import { isFakeMode } from 'util/fakeMode';
 
 interface INicoliveModeratorsService {
   // moderator の userId 集合
@@ -221,6 +222,10 @@ export class NicoliveModeratorsService extends StatefulService<INicoliveModerato
   }
 
   async fetchModerators() {
+    if (isFakeMode()) {
+      this.setModeratorsCache([]);
+      return;
+    }
     const result = await this.client.fetchModerators();
     if (!isOk(result)) {
       throw NicoliveFailure.fromClientError('fetchModerators', result);

@@ -8,6 +8,7 @@ import { UuidService } from './uuid';
 import { EncoderFamily } from './settings/optimizer';
 import { UserService } from './user';
 import * as remote from '@electron/remote';
+import { isFakeMode } from 'util/fakeMode';
 
 function randomCharacters(len: number): string {
   const buf = randomBytes(len);
@@ -134,6 +135,9 @@ export class UsageStatisticsService extends Service {
    */
   async recordEvent(event: TUsageEvent) {
     console.log('recordEvent', event);
+    if (isFakeMode()) {
+      return;
+    }
     try {
       if (event.event === 'boot') {
         const headers = new Headers();
