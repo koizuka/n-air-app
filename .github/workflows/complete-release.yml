@@ -1,0 +1,107 @@
+name: Move Project Cards to Done
+
+on:
+  workflow_dispatch:
+
+jobs:
+  move-cards:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ vars.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Move cards
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          ORGANIZATION: 'n-air-app'
+          PROJECT_NUMBER: 3
+          SOURCE_FIELD_NAME: 'To Be Released (unstable)'
+          DESTINATION_FIELD_NAME: 'Released'
+        run: |
+          # プロジェクトIDとフィールドIDの取得
+          project_data=$(gh api graphql -f query='
+            query($org: String!, $number: Int!) {
+              organization(login: $org){
+                projectV2(number: $number) {
+                  id
+                  fields(first:100) {
+                    nodes {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER)
+
+          project_id=$(echo "$project_data" | jq -r '.data.organization.projectV2.id')
+          source_field_id=$(echo "$project_data" | jq -r ".data.organization.projectV2.fields.nodes[] | select(.name == \"$SOURCE_FIELD_NAME\") | .id")
+          destination_field_id=$(echo "$project_data" | jq -r ".data.organization.projectV2.fields.nodes[] | select(.name == \"$DESTINATION_FIELD_NAME\") | .id")
+          destination_option_id=$(echo "$project_data" | jq -r ".data.organization.projectV2.fields.nodes[] | select(.name == \"$DESTINATION_FIELD_NAME\") | .options[] | select(.name == \"$DESTINATION_FIELD_NAME\") | .id")
+
+          # ソースフィールドのアイテムを取得
+          items_data=$(gh api graphql -f query='
+            query($project_id: ID!, $field_id: ID!) {
+              node(id: $project_id) {
+                ... on ProjectV2 {
+                  items(first: 100) {
+                    nodes {
+                      id
+                      fieldValues(first: 100) {
+                        nodes {
+                          ... on ProjectV2ItemFieldSingleSelectValue {
+                            field {
+                              ... on ProjectV2SingleSelectField {
+                                id
+                              }
+                            }
+                            optionId
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f project_id=$project_id -F field_id=$source_field_id)
+
+          # アイテムを移動
+          echo "$items_data" | jq -c '.data.node.items.nodes[]' | while read item; do
+            item_id=$(echo "$item" | jq -r '.id')
+            current_field_value=$(echo "$item" | jq -r ".fieldValues.nodes[] | select(.field.id == \"$source_field_id\") | .optionId")
+            
+            if [ "$current_field_value" != "null" ]; then
+              gh api graphql -f query='
+                mutation($project_id: ID!, $item_id: ID!, $field_id: ID!, $option_id: String) {
+                  updateProjectV2ItemFieldValue(
+                    input: {
+                      projectId: $project_id
+                      itemId: $item_id
+                      fieldId: $field_id
+                      value: { 
+                        singleSelectOptionId: $option_id
+                      }
+                    }
+                  ) {
+                    projectV2Item {
+                      id
+                    }
+                  }
+                }
+              ' -f project_id=$project_id -f item_id=$item_id -f field_id=$destination_field_id -f option_id=$destination_option_id
+              
+              echo "Moved item $item_id"
+            fi
+          done
