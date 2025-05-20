@@ -22,12 +22,12 @@ function getSentryMiniDumpURLFromDSN(dsn) {
 
 /** @type function ({production: boolean}, {mode?:string}): import('webpack').Configuration */
 module.exports = function (env, argv) {
-  const SENTRY_ORG = 'n-air-app2';
+  const SENTRY_ORG = 'akihiko-koizuka';
   const SENTRY_PROJECT = (() => {
     if (argv.mode === 'production') {
       return package.name === 'n-air-app' ? 'n-air-app' : 'n-air-app-unstable';
     } else {
-      return 'n-air-app-dwango';
+      return 'n-air-dev';
     }
   })();
   const SentryDSNTable = {
@@ -37,6 +37,7 @@ module.exports = function (env, argv) {
       'https://7451aaa71b7640a69ee1d31d6fd9ef78@o4507508755791872.ingest.us.sentry.io/1546758',
     'n-air-app-dwango':
       'https://1cb5cdf6a93c466dad570861b8c82b61@o4507508755791872.ingest.us.sentry.io/1262580',
+    'n-air-dev': 'https://9264887647bb4b108355c6bef3a9bb5d@o159526.ingest.us.sentry.io/1222027',
   };
   const SENTRY_DSN = SentryDSNTable[SENTRY_PROJECT];
   const SENTRY_MINIDUMP_URL = getSentryMiniDumpURLFromDSN(SENTRY_DSN);

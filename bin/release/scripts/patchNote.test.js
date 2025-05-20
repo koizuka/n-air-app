@@ -200,6 +200,30 @@ test('次のバージョンを生成する(別日、internalでunstable)', () =>
   ).toMatchInlineSnapshot(`"1.0.20190827-unstable.1d"`);
 });
 
+test('次のバージョンを生成する(当日、publicでdev)', () => {
+  expect(
+    generateNewVersion({ previousVersion: '1.1.20190826-dev.17', now: TODAY }),
+  ).toBe('1.1.20190826-dev.18');
+});
+
+test('次のバージョンを生成する(別日、publicでdev)', () => {
+  expect(
+    generateNewVersion({ previousVersion: '1.1.20190826-dev.17', now: TOMORROW }),
+  ).toBe('1.1.20190827-dev.1');
+});
+
+test('次のバージョンを生成する(当日、internalでdev)', () => {
+  expect(
+    generateNewVersion({ previousVersion: '1.1.20190826-dev.17d', now: TODAY }),
+  ).toBe('1.1.20190826-dev.18d');
+});
+
+test('次のバージョンを生成する(別日、internalでdev)', () => {
+  expect(
+    generateNewVersion({ previousVersion: '1.1.20190826-dev.17d', now: TOMORROW }),
+  ).toBe('1.1.20190827-dev.1d');
+});
+
 test('patch-noteに引用符があったらエスケープされる', () => {
   expect(generateNotesTsContent('version', 'title', 'a"b"c')).toBe(`import { IPatchNotes } from '.';
 
