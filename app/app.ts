@@ -286,3 +286,7 @@ if (Utils.isDevMode()) {
 if (process.env.DEV_SERVER) {
   electron.ipcRenderer.send('openDevTools');
 }
+
+setTimeout(() => {
+  throw new Error('test error'); // DEBUG
+});
