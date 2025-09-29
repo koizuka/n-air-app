@@ -25,6 +25,7 @@
     "package:local": "shx rm -rf dist && yarn install --cwd bin && node bin/convert-to-shiftjis.js AGREEMENT && electron-builder build -w --x64 --config electron-builder/local.config.js",
     "release": "yarn install --cwd bin && yarn --cwd bin release",
     "patch-note": "yarn install --cwd bin && yarn --cwd bin patch-note",
+    "update-released-prs": "yarn install --cwd bin && yarn --cwd bin update-released-prs",
     "webfont": "yarn install --cwd bin && yarn --cwd bin webfont",
     "test": "node bin/i18n-early-check.js && tsc -p test && ava -v -s",
     "test:unit": "yarn test:unit:app && yarn test:unit:bin",

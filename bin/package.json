@@ -7,6 +7,7 @@
   "scripts": {
     "release": "node release/mini-release.js",
     "patch-note": "node release/generatePatchNote.js",
+    "update-released-prs": "node release/update-released-prs.js",
     "webfont": "node generate-webfont.js"
   },
   "dependencies": {
